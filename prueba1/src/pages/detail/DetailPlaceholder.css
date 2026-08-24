@@ -1,0 +1,43 @@
+.detail-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 60px 20px;
+}
+
+.detail-placeholder__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 12.5px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.detail-placeholder__back:hover {
+  background: var(--bg-surface-2);
+  color: var(--accent-strong);
+}
+
+.detail-placeholder__back svg {
+  width: 16px;
+  height: 16px;
+}
+
+.detail-placeholder h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.detail-placeholder p {
+  color: var(--text-muted);
+  font-size: 13.5px;
+}

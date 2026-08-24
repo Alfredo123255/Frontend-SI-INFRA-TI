@@ -1,0 +1,133 @@
+.world-map {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  background: var(--map-ocean);
+}
+
+.world-map__svg {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.world-map__svg:active {
+  cursor: grabbing;
+}
+
+.world-map__country {
+  fill: var(--map-land);
+  stroke: var(--map-border);
+  stroke-width: 0.5;
+  transition: fill 0.25s ease;
+}
+
+.world-map__country.is-peru {
+  fill: var(--map-land-focus);
+  stroke: var(--accent-strong);
+  stroke-width: 1;
+}
+
+.world-map__controls {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 5;
+}
+
+.world-map__controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--tooltip-shadow);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.world-map__controls button:hover {
+  background: var(--bg-surface-3);
+  color: var(--accent-strong);
+}
+
+.world-map__controls button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dc-marker {
+  cursor: pointer;
+}
+
+.dc-marker__dot {
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6));
+}
+
+.dc-marker__pulse {
+  fill: none;
+  stroke-width: 1.6;
+  opacity: 0.55;
+  animation: dc-pulse 2.4s ease-out infinite;
+  transform-origin: center;
+}
+
+.dc-marker--active .dc-marker__pulse {
+  animation-duration: 1.5s;
+  opacity: 0.8;
+}
+
+@keyframes dc-pulse {
+  0% {
+    r: 5;
+    opacity: 0.7;
+  }
+  100% {
+    r: 16;
+    opacity: 0;
+  }
+}
+
+.dc-tooltip {
+  background: var(--tooltip-bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  box-shadow: 0 8px 24px var(--tooltip-shadow);
+  font-family: var(--font-sans);
+  pointer-events: none;
+}
+
+.dc-tooltip__id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent-strong);
+  letter-spacing: 0.03em;
+}
+
+.dc-tooltip__name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 2px 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dc-tooltip__meta {
+  display: flex;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-muted);
+}

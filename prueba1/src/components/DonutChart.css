@@ -1,0 +1,53 @@
+.donut-chart {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.donut-chart__value {
+  fill: var(--text-primary);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.donut-chart__label {
+  fill: var(--text-muted);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.donut-chart__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 140px;
+}
+
+.donut-chart__legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.donut-chart__swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.donut-chart__legend-label {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.donut-chart__legend-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}

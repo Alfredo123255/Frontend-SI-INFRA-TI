@@ -1,0 +1,116 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(6px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar__title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.topbar__subtitle {
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar__theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.topbar__theme-btn:hover {
+  background: var(--bg-surface-2);
+  color: var(--accent-strong);
+  border-color: var(--border-strong);
+}
+
+.topbar__theme-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.topbar__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.topbar__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.topbar__status--good {
+  color: var(--status-good);
+  background: var(--status-good-bg);
+}
+.topbar__status--good .topbar__status-dot {
+  background: var(--status-good);
+  box-shadow: 0 0 8px var(--status-good);
+}
+
+.topbar__status--warning {
+  color: var(--status-warning);
+  background: var(--status-warning-bg);
+}
+.topbar__status--warning .topbar__status-dot {
+  background: var(--status-warning);
+  box-shadow: 0 0 8px var(--status-warning);
+}
+
+.topbar__status--critical {
+  color: var(--status-critical);
+  background: var(--status-critical-bg);
+}
+.topbar__status--critical .topbar__status-dot {
+  background: var(--status-critical);
+  box-shadow: 0 0 8px var(--status-critical);
+}
+
+.topbar__clock {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+}
+
+@media (max-width: 720px) {
+  .topbar__subtitle {
+    display: none;
+  }
+}

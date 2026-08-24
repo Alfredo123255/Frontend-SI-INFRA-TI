@@ -1,0 +1,270 @@
+:root {
+  color-scheme: dark;
+
+  /* Superficies (modo oscuro, por defecto) */
+  --bg-page: #0a0d12;
+  --bg-surface: #10151c;
+  --bg-surface-2: #161d26;
+  --bg-surface-3: #1c2530;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Tinta */
+  --text-primary: #eef2f7;
+  --text-secondary: #9fb0c3;
+  --text-muted: #64758a;
+
+  /* Marca / acento (uso exclusivo de UI, nunca como identidad de serie en gráficos) */
+  --accent: #22d3ee;
+  --accent-strong: #67e8f9;
+  --accent-soft: rgba(34, 211, 238, 0.12);
+  --accent-glow: rgba(34, 211, 238, 0.35);
+
+  /* Estado (reservado, fijo: no varía entre temas) */
+  --status-good: #0ca30c;
+  --status-good-bg: rgba(12, 163, 12, 0.14);
+  --status-warning: #fab219;
+  --status-warning-bg: rgba(250, 178, 25, 0.14);
+  --status-serious: #ec835a;
+  --status-serious-bg: rgba(236, 131, 90, 0.14);
+  --status-critical: #d03b3b;
+  --status-critical-bg: rgba(208, 59, 59, 0.16);
+
+  /* Categórico (gráficos, orden fijo — valores de paso "oscuro") */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #4fae4f;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+
+  --gridline: #22303f;
+
+  /* Mapa / decoraciones */
+  --map-ocean: #0b1119;
+  --map-land: #1a2636;
+  --map-land-focus: #204461;
+  --map-border: rgba(140, 190, 210, 0.22);
+  --map-grid-line: rgba(103, 232, 249, 0.05);
+  --tooltip-bg: rgba(12, 17, 24, 0.96);
+  --tooltip-shadow: rgba(0, 0, 0, 0.45);
+  --topbar-bg: rgba(16, 21, 28, 0.6);
+  --page-glow-1: rgba(34, 211, 238, 0.06);
+  --page-glow-2: rgba(103, 232, 249, 0.05);
+
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: "Cascadia Code", "Consolas", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Superficies */
+  --bg-page: #eef2f8;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f1f4f9;
+  --bg-surface-3: #e4e9f1;
+  --border: rgba(15, 23, 42, 0.09);
+  --border-strong: rgba(15, 23, 42, 0.18);
+
+  /* Tinta */
+  --text-primary: #0f172a;
+  --text-secondary: #45506a;
+  --text-muted: #7c87a3;
+
+  /* Marca / acento */
+  --accent: #0891b2;
+  --accent-strong: #0e7490;
+  --accent-soft: rgba(8, 145, 178, 0.1);
+  --accent-glow: rgba(8, 145, 178, 0.25);
+
+  /* Categórico — valores de paso "claro" */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+
+  --gridline: #dde3ee;
+
+  /* Mapa / decoraciones */
+  --map-ocean: #dbe7f3;
+  --map-land: #eef2f7;
+  --map-land-focus: #bfe4ee;
+  --map-border: rgba(15, 23, 42, 0.14);
+  --map-grid-line: rgba(15, 23, 42, 0.07);
+  --tooltip-bg: rgba(255, 255, 255, 0.98);
+  --tooltip-shadow: rgba(15, 23, 42, 0.16);
+  --topbar-bg: rgba(255, 255, 255, 0.75);
+  --page-glow-1: rgba(8, 145, 178, 0.05);
+  --page-glow-2: rgba(103, 148, 232, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at 12% 8%, var(--page-glow-1), transparent 40%),
+    radial-gradient(circle at 85% 90%, var(--page-glow-2), transparent 45%);
+  background-attachment: fixed;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#root {
+  height: 100%;
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-surface-3);
+  border-radius: 10px;
+  border: 2px solid var(--bg-page);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tooltip CSS puro: muestra el valor real de una celda al pasar el mouse */
+
+.hover-tip {
+  position: relative;
+  display: inline-block;
+}
+
+.hover-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  transform: translateY(-6px);
+  background: var(--tooltip-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  box-shadow: 0 8px 20px var(--tooltip-shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 30;
+}
+
+.hover-tip:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Componentes compartidos: paneles y tarjetas KPI */
+
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+}
+
+.panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel__header h2 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.panel__header p {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.kpi-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.kpi-tile__icon {
+  width: 34px;
+  height: 34px;
+  padding: 7px;
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  flex-shrink: 0;
+}
+
+.kpi-tile--warn .kpi-tile__icon {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+}
+
+.kpi-tile__value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.kpi-tile__label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}

@@ -1,0 +1,41 @@
+import { useState } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
+import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import Inventory from "./pages/Inventory";
+import ServerDetail from "./pages/detail/ServerDetail";
+import StorageDetail from "./pages/detail/StorageDetail";
+import SwitchDetail from "./pages/detail/SwitchDetail";
+import { useTheme } from "./hooks/useTheme";
+import "./App.css";
+
+function App() {
+  const [collapsed, setCollapsed] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
+
+  return (
+    <div className="app-shell">
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+      <div className="app-main">
+        <Topbar pathname={location.pathname} theme={theme} onToggleTheme={toggleTheme} />
+        <main className="app-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/inventario" element={<Navigate to="/inventario/servidores" replace />} />
+            <Route path="/inventario/servidores/:id" element={<ServerDetail />} />
+            <Route path="/inventario/storage/:id" element={<StorageDetail />} />
+            <Route path="/inventario/switches/:id" element={<SwitchDetail />} />
+            <Route path="/inventario/:categoria" element={<Inventory />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default App;

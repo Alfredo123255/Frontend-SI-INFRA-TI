@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(powershell -NoProfile -Command 'Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match '\\\\''vite'\\\\'' -and $_.Name -eq '\\\\''node.exe'\\\\'' } | Select-Object ProcessId, CommandLine')",
-      "Bash(node -e ' *)",
-      "Bash(curl -sL -o /tmp/world-110m.json \"https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json\" -w \"HTTP:%{http_code} SIZE:%{size_download}\\\\n\")"
-    ]
-  }
-}

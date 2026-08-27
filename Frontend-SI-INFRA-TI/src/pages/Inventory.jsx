@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { NavLink, Link, useParams, Navigate } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge";
-import { IconMonitor, IconDrive, IconSwitch } from "../components/icons";
-import { servers, storageDevices, switches } from "../data/inventory";
+import { IconMonitor, IconDrive, IconSwitch, IconServerStack } from "../components/icons";
+import { servers, storageDevices, switches, chasisBlades } from "../data/inventory";
 import { datacenters } from "../data/datacenters";
 import "./Inventory.css";
 
@@ -10,6 +10,7 @@ const tabs = [
   { key: "servidores", label: "Servidores", icon: IconMonitor },
   { key: "storage", label: "Storage", icon: IconDrive },
   { key: "switches", label: "Switches", icon: IconSwitch },
+  { key: "chasis-blades", label: "Chasis Blades", icon: IconServerStack },
 ];
 
 const dcName = (id) => datacenters.find((dc) => dc.id === id)?.city ?? id;
@@ -20,6 +21,7 @@ const columnsByTab = {
     { key: "cluster", label: "Cluster" },
     { key: "dc", label: "Data Center" },
     { key: "model", label: "Modelo" },
+    { key: "tipo", label: "Tipo" },
     { key: "ramPct", label: "% RAM" },
     { key: "cpuPct", label: "% CPU" },
     { key: "status", label: "Estado" },
@@ -42,9 +44,17 @@ const columnsByTab = {
     { key: "speed", label: "Velocidad" },
     { key: "status", label: "Estado" },
   ],
+  "chasis-blades": [
+    { key: "name", label: "Nombre" },
+    { key: "cluster", label: "Cluster" },
+    { key: "dc", label: "Data Center" },
+    { key: "model", label: "Modelo" },
+    { key: "ip", label: "IP de Gestión" },
+    { key: "status", label: "Estado" },
+  ],
 };
 
-const datasets = { servidores: servers, storage: storageDevices, switches };
+const datasets = { servidores: servers, storage: storageDevices, switches, "chasis-blades": chasisBlades };
 
 function Inventory() {
   const { categoria } = useParams();
@@ -147,13 +157,18 @@ function Inventory() {
 function renderCell(categoria, row, key) {
   if (key === "status") return <StatusBadge status={row.status} />;
   if (key === "name") {
+    const to =
+      categoria === "servidores"
+        ? `/inventario/servidores/${row.tipo === "BLADE" ? "blade" : "rackeable"}/${row.id}`
+        : `/inventario/${categoria}/${row.id}`;
     return (
-      <Link to={`/inventario/${categoria}/${row.id}`} className="inventory__name-link">
+      <Link to={to} className="inventory__name-link">
         {row.name}
       </Link>
     );
   }
   if (key === "id") return <span className="inventory__mono">{row.id}</span>;
+  if (key === "tipo") return <span className="inventory__tag">{row.tipo}</span>;
   if (key === "cluster") return <span className="inventory__tag">{row.cluster}</span>;
   if (key === "dc") return dcName(row.dc);
   if (key === "ramGB") return `${row.ramGB} GB`;

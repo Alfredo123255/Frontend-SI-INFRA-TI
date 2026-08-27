@@ -17,6 +17,7 @@ const inventoryLinks = [
   { to: "/inventario/servidores", label: "Servidores", icon: IconMonitor },
   { to: "/inventario/storage", label: "Storage", icon: IconDrive },
   { to: "/inventario/switches", label: "Switches", icon: IconSwitch },
+  { to: "/inventario/chasis-blades", label: "Chasis Blades", icon: IconServerStack },
 ];
 
 function Sidebar({ collapsed, onToggle }) {

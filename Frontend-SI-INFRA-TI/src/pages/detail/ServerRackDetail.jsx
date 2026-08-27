@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { IconChevronLeft } from "../../components/icons";
 import "./DetailPlaceholder.css";
 
-function ServerDetail() {
+function ServerRackDetail() {
   const { id } = useParams();
 
   return (
@@ -11,10 +11,10 @@ function ServerDetail() {
         <IconChevronLeft />
         Volver a Servidores
       </Link>
-      <h1>Servidor {id}</h1>
+      <h1>Servidor Rackeable {id}</h1>
       <p>Página de detalle en construcción.</p>
     </div>
   );
 }
 
-export default ServerDetail;
+export default ServerRackDetail;

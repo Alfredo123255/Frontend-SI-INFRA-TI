@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   IconHome,
@@ -24,6 +25,9 @@ function Sidebar({ collapsed, onToggle }) {
   const location = useLocation();
   const isInventoryRoute = location.pathname.startsWith("/inventario");
   const [inventoryOpen, setInventoryOpen] = useState(isInventoryRoute);
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const [flyoutPos, setFlyoutPos] = useState({ top: 0, left: 0 });
+  const groupRef = useRef(null);
 
   const handleInventoryClick = () => {
     if (collapsed) {
@@ -33,6 +37,15 @@ function Sidebar({ collapsed, onToggle }) {
     }
     setInventoryOpen((open) => !open);
   };
+
+  const openFlyout = () => {
+    if (!collapsed || !groupRef.current) return;
+    const rect = groupRef.current.getBoundingClientRect();
+    setFlyoutPos({ top: rect.top, left: rect.right + 4 });
+    setFlyoutOpen(true);
+  };
+
+  const closeFlyout = () => setFlyoutOpen(false);
 
   return (
     <aside className={`sidebar ${collapsed ? "sidebar--collapsed" : ""}`}>
@@ -68,7 +81,12 @@ function Sidebar({ collapsed, onToggle }) {
           {!collapsed && <span>Inicio</span>}
         </NavLink>
 
-        <div className="sidebar__group">
+        <div
+          className="sidebar__group"
+          ref={groupRef}
+          onMouseEnter={openFlyout}
+          onMouseLeave={closeFlyout}
+        >
           <button
             type="button"
             className={`sidebar__item sidebar__item--button ${isInventoryRoute ? "is-active" : ""}`}
@@ -105,6 +123,33 @@ function Sidebar({ collapsed, onToggle }) {
               </div>
             </div>
           )}
+
+          {collapsed &&
+            flyoutOpen &&
+            createPortal(
+              <div
+                className="sidebar__flyout"
+                style={{ top: flyoutPos.top, left: flyoutPos.left }}
+                onMouseEnter={openFlyout}
+                onMouseLeave={closeFlyout}
+              >
+                <div className="sidebar__flyout-title">Inventario</div>
+                {inventoryLinks.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    className={({ isActive }) =>
+                      `sidebar__flyout-item ${isActive ? "is-active" : ""}`
+                    }
+                    onClick={closeFlyout}
+                  >
+                    <Icon className="sidebar__subitem-icon" />
+                    <span>{label}</span>
+                  </NavLink>
+                ))}
+              </div>,
+              document.body
+            )}
         </div>
 
         <NavLink

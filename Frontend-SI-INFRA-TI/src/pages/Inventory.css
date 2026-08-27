@@ -50,6 +50,7 @@
 
 .inventory__toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   padding: 16px 20px;
@@ -87,10 +88,28 @@
   outline: none;
 }
 
+.inventory__clear-btn {
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.inventory__clear-btn:hover {
+  background: var(--bg-surface-2);
+  color: var(--accent-strong);
+  border-color: var(--border-strong);
+}
+
 .inventory__result-count {
   margin-left: auto;
   font-size: 12px;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .inventory__table-wrap {

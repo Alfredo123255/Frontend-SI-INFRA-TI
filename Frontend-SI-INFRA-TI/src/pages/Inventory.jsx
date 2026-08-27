@@ -1,10 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, Link, useParams, Navigate } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge";
 import { IconMonitor, IconDrive, IconSwitch, IconServerStack } from "../components/icons";
 import { servers, storageDevices, switches, chasisBlades } from "../data/inventory";
-import { datacenters } from "../data/datacenters";
+import { datacenters, STATUS } from "../data/datacenters";
 import "./Inventory.css";
+
+const EMPTY_FILTERS = { dc: "all", status: "all", cluster: "all", marca: "all", model: "all" };
+
+const uniqueSorted = (values) =>
+  [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
 
 const tabs = [
   { key: "servidores", label: "Servidores", icon: IconMonitor },
@@ -59,22 +64,46 @@ const datasets = { servidores: servers, storage: storageDevices, switches, "chas
 function Inventory() {
   const { categoria } = useParams();
   const [query, setQuery] = useState("");
-  const [dcFilter, setDcFilter] = useState("all");
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
 
   const rows = datasets[categoria] ?? [];
   const columns = columnsByTab[categoria] ?? [];
 
+  useEffect(() => {
+    setQuery("");
+    setFilters(EMPTY_FILTERS);
+  }, [categoria]);
+
+  const dcOptions = useMemo(() => uniqueSorted(rows.map((row) => row.dc)), [rows]);
+  const statusOptions = useMemo(() => uniqueSorted(rows.map((row) => row.status)), [rows]);
+  const clusterOptions = useMemo(() => uniqueSorted(rows.map((row) => row.cluster)), [rows]);
+  const marcaOptions = useMemo(() => uniqueSorted(rows.map((row) => row.marca)), [rows]);
+  const modelOptions = useMemo(() => uniqueSorted(rows.map((row) => row.model)), [rows]);
+
+  const setFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+  const clearFilters = () => {
+    setQuery("");
+    setFilters(EMPTY_FILTERS);
+  };
+  const hasActiveFilters = query.trim() !== "" || Object.values(filters).some((value) => value !== "all");
+
   const filtered = useMemo(() => {
-    return (datasets[categoria] ?? []).filter((row) => {
+    return rows.filter((row) => {
       const matchesQuery =
         query.trim() === "" ||
         row.name.toLowerCase().includes(query.toLowerCase()) ||
         row.id.toLowerCase().includes(query.toLowerCase()) ||
         row.model.toLowerCase().includes(query.toLowerCase());
-      const matchesDc = dcFilter === "all" || row.dc === dcFilter;
-      return matchesQuery && matchesDc;
+      const matchesDc = filters.dc === "all" || row.dc === filters.dc;
+      const matchesStatus = filters.status === "all" || row.status === filters.status;
+      const matchesCluster = filters.cluster === "all" || row.cluster === filters.cluster;
+      const matchesMarca = filters.marca === "all" || row.marca === filters.marca;
+      const matchesModel = filters.model === "all" || row.model === filters.model;
+      return (
+        matchesQuery && matchesDc && matchesStatus && matchesCluster && matchesMarca && matchesModel
+      );
     });
-  }, [categoria, query, dcFilter]);
+  }, [rows, query, filters]);
 
   if (!datasets[categoria]) {
     return <Navigate to="/inventario/servidores" replace />;
@@ -106,17 +135,74 @@ function Inventory() {
             className="inventory__search"
           />
           <select
-            value={dcFilter}
-            onChange={(e) => setDcFilter(e.target.value)}
+            value={filters.dc}
+            onChange={(e) => setFilter("dc", e.target.value)}
             className="inventory__select"
           >
-            <option value="all">Todos los data centers</option>
-            {datacenters.map((dc) => (
-              <option key={dc.id} value={dc.id}>
-                {dc.name}
+            <option value="all">Data Center: todos</option>
+            {datacenters
+              .filter((dc) => dcOptions.includes(dc.id))
+              .map((dc) => (
+                <option key={dc.id} value={dc.id}>
+                  {dc.name}
+                </option>
+              ))}
+          </select>
+          <select
+            value={filters.status}
+            onChange={(e) => setFilter("status", e.target.value)}
+            className="inventory__select"
+          >
+            <option value="all">Estado: todos</option>
+            {statusOptions.map((status) => (
+              <option key={status} value={status}>
+                {STATUS[status]?.label ?? status}
               </option>
             ))}
           </select>
+          {clusterOptions.length > 0 && (
+            <select
+              value={filters.cluster}
+              onChange={(e) => setFilter("cluster", e.target.value)}
+              className="inventory__select"
+            >
+              <option value="all">Cluster: todos</option>
+              {clusterOptions.map((cluster) => (
+                <option key={cluster} value={cluster}>
+                  {cluster}
+                </option>
+              ))}
+            </select>
+          )}
+          <select
+            value={filters.marca}
+            onChange={(e) => setFilter("marca", e.target.value)}
+            className="inventory__select"
+          >
+            <option value="all">Marca: todas</option>
+            {marcaOptions.map((marca) => (
+              <option key={marca} value={marca}>
+                {marca}
+              </option>
+            ))}
+          </select>
+          <select
+            value={filters.model}
+            onChange={(e) => setFilter("model", e.target.value)}
+            className="inventory__select"
+          >
+            <option value="all">Modelo: todos</option>
+            {modelOptions.map((model) => (
+              <option key={model} value={model}>
+                {model}
+              </option>
+            ))}
+          </select>
+          {hasActiveFilters && (
+            <button type="button" className="inventory__clear-btn" onClick={clearFilters}>
+              Limpiar filtros
+            </button>
+          )}
           <span className="inventory__result-count tabular">
             {filtered.length} de {rows.length}
           </span>

@@ -51,14 +51,21 @@ const puertosRows = [
   { numeroPuerto: "Eth1/4", velocidad: "100 Gbps", tipoTransceiver: "—", estadoPuerto: "Libre" },
 ];
 
+const energiaInfo = [
+  { label: "Temperatura Actual", value: "24°C" },
+  { label: "Consumo Energético", value: "410 W" },
+];
+
 const fuentesPoderColumns = [
   { key: "modelo", label: "Modelo" },
+  { key: "consumoW", label: "Consumo (W)" },
+  { key: "tipoCorriente", label: "Tipo de Corriente" },
   { key: "estado", label: "Estado" },
 ];
 
 const fuentesPoderRows = [
-  { modelo: "Cisco Nexus 930W AC PSU", estado: "Operativo" },
-  { modelo: "Cisco Nexus 930W AC PSU", estado: "Standby" },
+  { modelo: "Cisco Nexus 930W AC PSU", consumoW: 930, tipoCorriente: "AC", estado: "Operativo" },
+  { modelo: "Cisco Nexus 930W AC PSU", consumoW: 930, tipoCorriente: "AC", estado: "Standby" },
 ];
 
 const fansColumns = [
@@ -109,7 +116,13 @@ function renderSectionBody(key) {
     case "puertos":
       return <DetailTable columns={puertosColumns} rows={puertosRows} />;
     case "energia":
-      return <DetailTable columns={fuentesPoderColumns} rows={fuentesPoderRows} />;
+      return (
+        <>
+          <DetailInfoGrid items={energiaInfo} />
+          <span className="detail-subtitle">Fuentes de Poder</span>
+          <DetailTable columns={fuentesPoderColumns} rows={fuentesPoderRows} />
+        </>
+      );
     case "fans":
       return <DetailTable columns={fansColumns} rows={fansRows} />;
     case "cpu":

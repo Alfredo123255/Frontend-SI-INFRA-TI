@@ -12,7 +12,7 @@ const sections = [
   { key: "general", title: "Datos generales" },
   { key: "cpu", title: "CPU" },
   { key: "ram", title: "RAM" },
-  { key: "discos", title: "Discos" },
+  { key: "discos", title: "Almacenamiento" },
   { key: "energia", title: "Energía" },
   { key: "fans", title: "Fans" },
   { key: "red", title: "Tarjetas de Red" },
@@ -86,6 +86,17 @@ const discosRows = [
   { marca: "Samsung", modelo: "PM1643a", tipoDisco: "SAS SSD", capacidadGb: 3840, velocidadRpm: "N/A", estado: "Operativo" },
 ];
 
+const raidColumns = [
+  { key: "modelo", label: "Modelo" },
+  { key: "raid", label: "RAID" },
+  { key: "estado", label: "Estado" },
+];
+
+const raidRows = [
+  { modelo: "HPE Smart Array P408i-a SR Gen10", raid: "RAID 1", estado: "Operativo" },
+  { modelo: "HPE Smart Array P408i-a SR Gen10", raid: "RAID 5", estado: "Operativo" },
+];
+
 const energiaInfo = [
   { label: "Temperatura Actual", value: "24°C" },
   { label: "Consumo Energético", value: "410 W" },
@@ -93,12 +104,14 @@ const energiaInfo = [
 
 const fuentesPoderColumns = [
   { key: "modelo", label: "Modelo" },
+  { key: "consumoW", label: "Consumo (W)" },
+  { key: "tipoCorriente", label: "Tipo de Corriente" },
   { key: "estado", label: "Estado" },
 ];
 
 const fuentesPoderRows = [
-  { modelo: "HPE 800W Flex Slot Platinum PSU", estado: "Operativo" },
-  { modelo: "HPE 800W Flex Slot Platinum PSU", estado: "Standby" },
+  { modelo: "HPE 800W Flex Slot Platinum PSU", consumoW: 800, tipoCorriente: "AC", estado: "Operativo" },
+  { modelo: "HPE 800W Flex Slot Platinum PSU", consumoW: 800, tipoCorriente: "AC", estado: "Standby" },
 ];
 
 const fansColumns = [
@@ -166,7 +179,14 @@ function renderSectionBody(key) {
     case "ram":
       return <DetailTable columns={ramColumns} rows={ramRows} />;
     case "discos":
-      return <DetailTable columns={discosColumns} rows={discosRows} />;
+      return (
+        <>
+          <span className="detail-subtitle">Controladoras RAID</span>
+          <DetailTable columns={raidColumns} rows={raidRows} />
+          <span className="detail-subtitle">Discos</span>
+          <DetailTable columns={discosColumns} rows={discosRows} />
+        </>
+      );
     case "energia":
       return (
         <>

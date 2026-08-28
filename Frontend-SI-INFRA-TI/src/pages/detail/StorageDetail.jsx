@@ -10,7 +10,7 @@ import "./ServerRackDetail.css";
 
 const sections = [
   { key: "general", title: "Datos generales" },
-  { key: "discos", title: "Discos" },
+  { key: "discos", title: "Almacenamiento" },
   { key: "red", title: "Tarjetas de Red" },
   { key: "cpu", title: "CPU" },
   { key: "ram", title: "RAM" },
@@ -84,6 +84,17 @@ const discosRows = [
   { marca: "Dell EMC", modelo: "PowerStore NVMe 3.84TB", tipoDisco: "NVMe SSD", capacidadGb: 3840, velocidadRpm: "N/A", estado: "Operativo" },
 ];
 
+const raidColumns = [
+  { key: "modelo", label: "Modelo" },
+  { key: "raid", label: "RAID" },
+  { key: "estado", label: "Estado" },
+];
+
+const raidRows = [
+  { modelo: "Dell EMC PERC H755 Front", raid: "RAID 6", estado: "Operativo" },
+  { modelo: "Dell EMC PERC H755 Front", raid: "RAID 10", estado: "Operativo" },
+];
+
 const redColumns = [
   { key: "nombreTarjeta", label: "Tarjeta" },
   { key: "marca", label: "Marca" },
@@ -127,14 +138,21 @@ const fansRows = [
   { modelo: "Dell EMC Cooling Fan Module", velocidadRpm: 5750, estado: "Operativo" },
 ];
 
+const energiaInfo = [
+  { label: "Temperatura Actual", value: "24°C" },
+  { label: "Consumo Energético", value: "410 W" },
+];
+
 const fuentesPoderColumns = [
   { key: "modelo", label: "Modelo" },
+  { key: "consumoW", label: "Consumo (W)" },
+  { key: "tipoCorriente", label: "Tipo de Corriente" },
   { key: "estado", label: "Estado" },
 ];
 
 const fuentesPoderRows = [
-  { modelo: "Dell EMC 1100W Titanium PSU", estado: "Operativo" },
-  { modelo: "Dell EMC 1100W Titanium PSU", estado: "Standby" },
+  { modelo: "Dell EMC 1100W Titanium PSU", consumoW: 1100, tipoCorriente: "AC", estado: "Operativo" },
+  { modelo: "Dell EMC 1100W Titanium PSU", consumoW: 1100, tipoCorriente: "AC", estado: "Standby" },
 ];
 
 function renderSectionBody(key) {
@@ -142,7 +160,14 @@ function renderSectionBody(key) {
     case "general":
       return <DetailInfoGrid items={generalInfo} />;
     case "discos":
-      return <DetailTable columns={discosColumns} rows={discosRows} />;
+      return (
+        <>
+          <span className="detail-subtitle">Controladoras RAID</span>
+          <DetailTable columns={raidColumns} rows={raidRows} />
+          <span className="detail-subtitle">Discos</span>
+          <DetailTable columns={discosColumns} rows={discosRows} />
+        </>
+      );
     case "red":
       return (
         <DetailExpandableTable
@@ -160,7 +185,13 @@ function renderSectionBody(key) {
     case "fans":
       return <DetailTable columns={fansColumns} rows={fansRows} />;
     case "energia":
-      return <DetailTable columns={fuentesPoderColumns} rows={fuentesPoderRows} />;
+      return (
+        <>
+          <DetailInfoGrid items={energiaInfo} />
+          <span className="detail-subtitle">Fuentes de Poder</span>
+          <DetailTable columns={fuentesPoderColumns} rows={fuentesPoderRows} />
+        </>
+      );
     default:
       return null;
   }

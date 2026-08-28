@@ -27,7 +27,10 @@ function DetailExpandableTable({ columns, rows, nestedColumns, nestedKey, nested
             const nestedRows = row[nestedKey] ?? [];
             return (
               <Fragment key={rowId}>
-                <tr className="detail-table__row--parent" onClick={() => toggleRow(rowId)}>
+                <tr
+                  className={`detail-table__row--parent ${isOpen ? "is-open" : ""}`}
+                  onClick={() => toggleRow(rowId)}
+                >
                   <td className="detail-table__toggle-col">
                     <IconChevronDown
                       className={`detail-table__row-caret ${isOpen ? "is-open" : ""}`}
@@ -39,10 +42,17 @@ function DetailExpandableTable({ columns, rows, nestedColumns, nestedKey, nested
                 </tr>
                 {isOpen && (
                   <tr className="detail-table__nested-row">
-                    <td />
+                    <td aria-hidden="true" />
                     <td colSpan={columns.length}>
-                      {nestedLabel && <div className="detail-table__nested-label">{nestedLabel}</div>}
-                      <DetailTable columns={nestedColumns} rows={nestedRows} />
+                      <div className="detail-table__nested">
+                        {nestedLabel && (
+                          <div className="detail-table__nested-label">
+                            <span className="detail-table__nested-dot" aria-hidden="true" />
+                            {nestedLabel}
+                          </div>
+                        )}
+                        <DetailTable columns={nestedColumns} rows={nestedRows} />
+                      </div>
                     </td>
                   </tr>
                 )}

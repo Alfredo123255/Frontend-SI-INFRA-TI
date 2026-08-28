@@ -11,7 +11,7 @@ const sections = [
   { key: "general", title: "Datos generales" },
   { key: "cpu", title: "CPU" },
   { key: "ram", title: "RAM" },
-  { key: "discos", title: "Discos" },
+  { key: "discos", title: "Almacenamiento" },
 ];
 
 const generalInfo = [
@@ -82,6 +82,16 @@ const discosRows = [
   { marca: "HPE", modelo: "MO001920JWTMR", tipoDisco: "SAS SSD", capacidadGb: 1920, velocidadRpm: "N/A", estado: "Operativo" },
 ];
 
+const raidColumns = [
+  { key: "modelo", label: "Modelo" },
+  { key: "raid", label: "RAID" },
+  { key: "estado", label: "Estado" },
+];
+
+const raidRows = [
+  { modelo: "HPE Smart Array P204i-c SR Gen10", raid: "RAID 1", estado: "Operativo" },
+];
+
 function renderSectionBody(key) {
   switch (key) {
     case "general":
@@ -91,7 +101,14 @@ function renderSectionBody(key) {
     case "ram":
       return <DetailTable columns={ramColumns} rows={ramRows} />;
     case "discos":
-      return <DetailTable columns={discosColumns} rows={discosRows} />;
+      return (
+        <>
+          <span className="detail-subtitle">Controladoras RAID</span>
+          <DetailTable columns={raidColumns} rows={raidRows} />
+          <span className="detail-subtitle">Discos</span>
+          <DetailTable columns={discosColumns} rows={discosRows} />
+        </>
+      );
     default:
       return null;
   }

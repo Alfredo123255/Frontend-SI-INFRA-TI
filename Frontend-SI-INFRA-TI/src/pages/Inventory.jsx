@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Link, useParams, Navigate } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge";
-import { IconMonitor, IconDrive, IconSwitch, IconServerStack } from "../components/icons";
+import { IconMonitor, IconDrive, IconSwitch, IconServerStack, IconDownload, IconChevronDown } from "../components/icons";
 import { servers, storageDevices, switches, chasisBlades } from "../data/inventory";
 import { datacenters, STATUS } from "../data/datacenters";
+import { exportRecordsToCsv, exportRecordsToExcel } from "../utils/exportTable";
 import "./Inventory.css";
 
 const EMPTY_FILTERS = { dc: "all", status: "all", cluster: "all", marca: "all", model: "all" };
@@ -61,10 +62,15 @@ const columnsByTab = {
 
 const datasets = { servidores: servers, storage: storageDevices, switches, "chasis-blades": chasisBlades };
 
+const tabLabels = Object.fromEntries(tabs.map((tab) => [tab.key, tab.label]));
+
 function Inventory() {
   const { categoria } = useParams();
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef(null);
 
   const rows = datasets[categoria] ?? [];
   const columns = columnsByTab[categoria] ?? [];
@@ -72,7 +78,19 @@ function Inventory() {
   useEffect(() => {
     setQuery("");
     setFilters(EMPTY_FILTERS);
+    setSelectedIds(new Set());
   }, [categoria]);
+
+  useEffect(() => {
+    if (!exportMenuOpen) return;
+    const handleClickOutside = (e) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target)) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [exportMenuOpen]);
 
   const dcOptions = useMemo(() => uniqueSorted(rows.map((row) => row.dc)), [rows]);
   const statusOptions = useMemo(() => uniqueSorted(rows.map((row) => row.status)), [rows]);
@@ -104,6 +122,55 @@ function Inventory() {
       );
     });
   }, [rows, query, filters]);
+
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((row) => selectedIds.has(row.id));
+  const someFilteredSelected = filtered.some((row) => selectedIds.has(row.id));
+
+  const toggleRow = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filtered.forEach((row) => next.delete(row.id));
+      } else {
+        filtered.forEach((row) => next.add(row.id));
+      }
+      return next;
+    });
+  };
+
+  const rowsToExport = someFilteredSelected
+    ? filtered.filter((row) => selectedIds.has(row.id))
+    : filtered;
+
+  const buildExportRecords = () =>
+    rowsToExport.map((row) => {
+      const record = {};
+      columns.forEach((col) => {
+        record[col.label] = getExportValue(categoria, row, col.key);
+      });
+      return record;
+    });
+
+  const handleExport = (format) => {
+    const records = buildExportRecords();
+    const baseName = `inventario-${categoria}`;
+    if (format === "csv") {
+      exportRecordsToCsv(records, `${baseName}.csv`);
+    } else {
+      exportRecordsToExcel(records, `${baseName}.xlsx`, tabLabels[categoria] ?? "Datos");
+    }
+    setExportMenuOpen(false);
+  };
 
   if (!datasets[categoria]) {
     return <Navigate to="/inventario/servidores" replace />;
@@ -206,12 +273,48 @@ function Inventory() {
           <span className="inventory__result-count tabular">
             {filtered.length} de {rows.length}
           </span>
+          <div className="inventory__export" ref={exportMenuRef}>
+            <button
+              type="button"
+              className="inventory__export-btn"
+              onClick={() => setExportMenuOpen((open) => !open)}
+              disabled={filtered.length === 0}
+            >
+              <IconDownload className="inventory__export-icon" />
+              Exportar{someFilteredSelected ? ` (${selectedIds.size})` : ""}
+              <IconChevronDown
+                className={`inventory__export-caret ${exportMenuOpen ? "is-open" : ""}`}
+              />
+            </button>
+            {exportMenuOpen && (
+              <div className="inventory__export-menu">
+                <button type="button" onClick={() => handleExport("excel")}>
+                  Exportar a Excel (.xlsx)
+                </button>
+                <button type="button" onClick={() => handleExport("csv")}>
+                  Exportar a CSV (.csv)
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="inventory__table-wrap">
           <table className="inventory__table">
             <thead>
               <tr>
+                <th className="inventory__select-col">
+                  <input
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = !allFilteredSelected && someFilteredSelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    disabled={filtered.length === 0}
+                    aria-label="Seleccionar todos"
+                  />
+                </th>
                 {columns.map((col) => (
                   <th key={col.key}>{col.label}</th>
                 ))}
@@ -219,7 +322,15 @@ function Inventory() {
             </thead>
             <tbody>
               {filtered.map((row) => (
-                <tr key={row.id}>
+                <tr key={row.id} className={selectedIds.has(row.id) ? "is-selected" : ""}>
+                  <td className="inventory__select-col">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(row.id)}
+                      onChange={() => toggleRow(row.id)}
+                      aria-label={`Seleccionar ${row.name}`}
+                    />
+                  </td>
                   {columns.map((col) => (
                     <td key={col.key}>{renderCell(categoria, row, col.key)}</td>
                   ))}
@@ -227,7 +338,7 @@ function Inventory() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={columns.length} className="inventory__empty">
+                  <td colSpan={columns.length + 1} className="inventory__empty">
                     No se encontraron equipos con los filtros actuales.
                   </td>
                 </tr>
@@ -287,6 +398,17 @@ function renderCell(categoria, row, key) {
       </div>
     );
   }
+  return row[key];
+}
+
+function getExportValue(categoria, row, key) {
+  if (key === "status") return STATUS[row.status]?.label ?? row.status;
+  if (key === "dc") return dcName(row.dc);
+  if (key === "ramGB") return `${row.ramGB} GB`;
+  if (key === "ports") return `${row.portsUsed}/${row.ports}`;
+  if (key === "ramPct") return `${row.ramPct}% (${Math.round((row.ramPct / 100) * row.ramGB)}/${row.ramGB} GB)`;
+  if (key === "cpuPct") return `${row.cpuPct}% (${Math.round((row.cpuPct / 100) * row.vcpus)}/${row.vcpus} vCPU)`;
+  if (categoria === "storage" && key === "capacity") return `${row.usedTB}/${row.capacityTB} TB`;
   return row[key];
 }
 

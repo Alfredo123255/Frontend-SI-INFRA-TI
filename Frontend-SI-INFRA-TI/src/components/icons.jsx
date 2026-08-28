@@ -129,3 +129,10 @@ export const IconTarget = (props) => (
     <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" />
   </svg>
 );
+
+export const IconDownload = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 3.5v11.5M7.5 10.5 12 15l4.5-4.5" />
+    <path d="M4.5 16.5v2.4a1.6 1.6 0 0 0 1.6 1.6h11.8a1.6 1.6 0 0 0 1.6-1.6v-2.4" />
+  </svg>
+);

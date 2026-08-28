@@ -34,6 +34,7 @@ const columnsByTab = {
   ],
   storage: [
     { key: "name", label: "Nombre" },
+    { key: "cluster", label: "Cluster" },
     { key: "dc", label: "Data Center" },
     { key: "model", label: "Modelo" },
     { key: "type", label: "Tipo" },
@@ -48,6 +49,7 @@ const columnsByTab = {
     { key: "type", label: "Tipo" },
     { key: "ports", label: "Puertos" },
     { key: "speed", label: "Velocidad" },
+    { key: "ip", label: "IP de Gestión" },
     { key: "status", label: "Estado" },
   ],
   "chasis-blades": [

@@ -14,14 +14,14 @@ export const servers = [
 ];
 
 export const storageDevices = [
-  { id: "STG-0031", name: "san-primary-lim", dc: "DC-LIM-01", marca: "Dell EMC", model: "Dell EMC PowerStore 5000T", type: "SAN All-Flash", capacityTB: 420, usedTB: 318, protocol: "FC 32Gb", status: "online" },
-  { id: "STG-0032", name: "nas-backup-cal", dc: "DC-CAL-01", marca: "NetApp", model: "NetApp FAS2750", type: "NAS Híbrido", capacityTB: 260, usedTB: 140, protocol: "NFS / iSCSI", status: "online" },
-  { id: "STG-0033", name: "san-secundario-tru", dc: "DC-TRU-01", marca: "HPE", model: "HPE Nimble AF40", type: "SAN All-Flash", capacityTB: 120, usedTB: 101, protocol: "iSCSI 10Gb", status: "warning" },
-  { id: "STG-0034", name: "object-store-lim", dc: "DC-LIM-01", marca: "MinIO", model: "MinIO Cluster (6 nodos)", type: "Object Storage", capacityTB: 200, usedTB: 87, protocol: "S3", status: "online" },
-  { id: "STG-0035", name: "nas-edge-piu", dc: "DC-PIU-01", marca: "Synology", model: "Synology RS3621xs+", type: "NAS", capacityTB: 60, usedTB: 22, protocol: "NFS", status: "online" },
-  { id: "STG-0036", name: "san-cus", dc: "DC-CUS-01", marca: "Dell EMC", model: "Dell EMC Unity 380", type: "SAN Híbrido", capacityTB: 40, usedTB: 34, protocol: "FC 16Gb", status: "offline" },
-  { id: "STG-0037", name: "nas-are", dc: "DC-ARE-01", marca: "QNAP", model: "QNAP TS-h2490FU", type: "NAS All-Flash", capacityTB: 150, usedTB: 96, protocol: "iSCSI 25Gb", status: "online" },
-  { id: "STG-0038", name: "backup-vault-iqt", dc: "DC-IQT-01", marca: "Synology", model: "Synology RS4021xs+", type: "Backup / Archivo", capacityTB: 30, usedTB: 11, protocol: "NFS", status: "online" },
+  { id: "STG-0031", name: "san-primary-lim", dc: "DC-LIM-01", cluster: "Almacenamiento Producción", marca: "Dell EMC", model: "Dell EMC PowerStore 5000T", type: "SAN All-Flash", capacityTB: 420, usedTB: 318, protocol: "FC 32Gb", status: "online" },
+  { id: "STG-0032", name: "nas-backup-cal", dc: "DC-CAL-01", cluster: "Backup & DR", marca: "NetApp", model: "NetApp FAS2750", type: "NAS Híbrido", capacityTB: 260, usedTB: 140, protocol: "NFS / iSCSI", status: "online" },
+  { id: "STG-0033", name: "san-secundario-tru", dc: "DC-TRU-01", cluster: "Almacenamiento Producción", marca: "HPE", model: "HPE Nimble AF40", type: "SAN All-Flash", capacityTB: 120, usedTB: 101, protocol: "iSCSI 10Gb", status: "warning" },
+  { id: "STG-0034", name: "object-store-lim", dc: "DC-LIM-01", cluster: "Object Storage", marca: "MinIO", model: "MinIO Cluster (6 nodos)", type: "Object Storage", capacityTB: 200, usedTB: 87, protocol: "S3", status: "online" },
+  { id: "STG-0035", name: "nas-edge-piu", dc: "DC-PIU-01", cluster: "Edge Gateways", marca: "Synology", model: "Synology RS3621xs+", type: "NAS", capacityTB: 60, usedTB: 22, protocol: "NFS", status: "online" },
+  { id: "STG-0036", name: "san-cus", dc: "DC-CUS-01", cluster: "Almacenamiento Producción", marca: "Dell EMC", model: "Dell EMC Unity 380", type: "SAN Híbrido", capacityTB: 40, usedTB: 34, protocol: "FC 16Gb", status: "offline" },
+  { id: "STG-0037", name: "nas-are", dc: "DC-ARE-01", cluster: "Virtualización VMware", marca: "QNAP", model: "QNAP TS-h2490FU", type: "NAS All-Flash", capacityTB: 150, usedTB: 96, protocol: "iSCSI 25Gb", status: "online" },
+  { id: "STG-0038", name: "backup-vault-iqt", dc: "DC-IQT-01", cluster: "Backup & DR", marca: "Synology", model: "Synology RS4021xs+", type: "Backup / Archivo", capacityTB: 30, usedTB: 11, protocol: "NFS", status: "online" },
 ];
 
 export const chasisBlades = [
@@ -35,13 +35,13 @@ export const chasisBlades = [
 ];
 
 export const switches = [
-  { id: "SWT-0071", name: "core-sw-lim-01", dc: "DC-LIM-01", marca: "Cisco", model: "Cisco Nexus 9336C-FX2", type: "Core", ports: 36, portsUsed: 31, speed: "100GbE", status: "online" },
-  { id: "SWT-0072", name: "acc-sw-lim-02", dc: "DC-LIM-01", marca: "Cisco", model: "Cisco Catalyst 9300", type: "Acceso", ports: 48, portsUsed: 40, speed: "1/10GbE", status: "online" },
-  { id: "SWT-0073", name: "core-sw-cal-01", dc: "DC-CAL-01", marca: "Juniper", model: "Juniper QFX5120", type: "Core", ports: 32, portsUsed: 18, speed: "40/100GbE", status: "online" },
-  { id: "SWT-0074", name: "acc-sw-tru-01", dc: "DC-TRU-01", marca: "Aruba", model: "HPE Aruba 6300M", type: "Acceso", ports: 24, portsUsed: 23, speed: "1/10GbE", status: "warning" },
-  { id: "SWT-0075", name: "edge-sw-piu-01", dc: "DC-PIU-01", marca: "Cisco", model: "Cisco Catalyst 9200", type: "Edge", ports: 24, portsUsed: 9, speed: "1GbE", status: "online" },
-  { id: "SWT-0076", name: "acc-sw-cus-01", dc: "DC-CUS-01", marca: "Aruba", model: "HPE Aruba 2930F", type: "Acceso", ports: 24, portsUsed: 15, speed: "1GbE", status: "offline" },
-  { id: "SWT-0077", name: "core-sw-are-01", dc: "DC-ARE-01", marca: "Juniper", model: "Juniper EX4400", type: "Core", ports: 48, portsUsed: 29, speed: "10/25GbE", status: "online" },
-  { id: "SWT-0078", name: "fw-perimetral-lim", dc: "DC-LIM-01", marca: "Fortinet", model: "Fortinet FortiGate 200F", type: "Firewall", ports: 16, portsUsed: 12, speed: "1/10GbE", status: "online" },
-  { id: "SWT-0079", name: "acc-sw-iqt-01", dc: "DC-IQT-01", marca: "Aruba", model: "HPE Aruba 2930F", type: "Acceso", ports: 24, portsUsed: 8, speed: "1GbE", status: "online" },
+  { id: "SWT-0071", name: "core-sw-lim-01", dc: "DC-LIM-01", marca: "Cisco", model: "Cisco Nexus 9336C-FX2", type: "Core", ports: 36, portsUsed: 31, speed: "100GbE", status: "online", ip: "10.10.0.11" },
+  { id: "SWT-0072", name: "acc-sw-lim-02", dc: "DC-LIM-01", marca: "Cisco", model: "Cisco Catalyst 9300", type: "Acceso", ports: 48, portsUsed: 40, speed: "1/10GbE", status: "online", ip: "10.10.0.12" },
+  { id: "SWT-0073", name: "core-sw-cal-01", dc: "DC-CAL-01", marca: "Juniper", model: "Juniper QFX5120", type: "Core", ports: 32, portsUsed: 18, speed: "40/100GbE", status: "online", ip: "10.20.0.11" },
+  { id: "SWT-0074", name: "acc-sw-tru-01", dc: "DC-TRU-01", marca: "Aruba", model: "HPE Aruba 6300M", type: "Acceso", ports: 24, portsUsed: 23, speed: "1/10GbE", status: "warning", ip: "10.30.0.11" },
+  { id: "SWT-0075", name: "edge-sw-piu-01", dc: "DC-PIU-01", marca: "Cisco", model: "Cisco Catalyst 9200", type: "Edge", ports: 24, portsUsed: 9, speed: "1GbE", status: "online", ip: "10.50.0.11" },
+  { id: "SWT-0076", name: "acc-sw-cus-01", dc: "DC-CUS-01", marca: "Aruba", model: "HPE Aruba 2930F", type: "Acceso", ports: 24, portsUsed: 15, speed: "1GbE", status: "offline", ip: "10.60.0.11" },
+  { id: "SWT-0077", name: "core-sw-are-01", dc: "DC-ARE-01", marca: "Juniper", model: "Juniper EX4400", type: "Core", ports: 48, portsUsed: 29, speed: "10/25GbE", status: "online", ip: "10.40.0.11" },
+  { id: "SWT-0078", name: "fw-perimetral-lim", dc: "DC-LIM-01", marca: "Fortinet", model: "Fortinet FortiGate 200F", type: "Firewall", ports: 16, portsUsed: 12, speed: "1/10GbE", status: "online", ip: "10.10.0.13" },
+  { id: "SWT-0079", name: "acc-sw-iqt-01", dc: "DC-IQT-01", marca: "Aruba", model: "HPE Aruba 2930F", type: "Acceso", ports: 24, portsUsed: 8, speed: "1GbE", status: "online", ip: "10.70.0.11" },
 ];

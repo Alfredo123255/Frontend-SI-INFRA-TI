@@ -2,7 +2,7 @@ import { Fragment, useState } from "react";
 import { IconChevronDown } from "../../components/icons";
 import DetailTable from "./DetailTable";
 
-function DetailExpandableTable({ columns, rows, nestedColumns, nestedKey, nestedLabel }) {
+function DetailExpandableTable({ columns, rows = [], nestedColumns, nestedKey, nestedLabel }) {
   const [openRows, setOpenRows] = useState({});
 
   const toggleRow = (rowId) => {
@@ -21,6 +21,13 @@ function DetailExpandableTable({ columns, rows, nestedColumns, nestedKey, nested
           </tr>
         </thead>
         <tbody>
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={columns.length + 1} className="detail-table__empty">
+                No hay componentes registrados.
+              </td>
+            </tr>
+          )}
           {rows.map((row, index) => {
             const rowId = row.id ?? index;
             const isOpen = Boolean(openRows[rowId]);

@@ -4,6 +4,22 @@
   gap: 16px;
 }
 
+.inventory__loading {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-2);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.inventory__load-error {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+  font-size: 13px;
+}
+
 .inventory__tabs {
   display: flex;
   gap: 8px;

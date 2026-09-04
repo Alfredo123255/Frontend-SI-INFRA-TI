@@ -1,4 +1,4 @@
-function DetailTable({ columns, rows }) {
+function DetailTable({ columns, rows = [] }) {
   return (
     <div className="detail-table-wrap">
       <table className="detail-table">
@@ -10,13 +10,21 @@ function DetailTable({ columns, rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
-            <tr key={index}>
-              {columns.map((col) => (
-                <td key={col.key}>{row[col.key]}</td>
-              ))}
+          {rows.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="detail-table__empty">
+                No hay componentes registrados.
+              </td>
             </tr>
-          ))}
+          ) : (
+            rows.map((row, index) => (
+              <tr key={index}>
+                {columns.map((col) => (
+                  <td key={col.key}>{row[col.key]}</td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

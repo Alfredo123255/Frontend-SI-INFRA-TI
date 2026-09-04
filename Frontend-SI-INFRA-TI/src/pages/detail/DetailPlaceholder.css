@@ -42,6 +42,14 @@
   font-size: 13.5px;
 }
 
+.detail-placeholder__error {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+  font-size: 13px;
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -113,6 +121,13 @@
 
 .detail-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.detail-table td.detail-table__empty {
+  padding: 24px 20px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
 }
 
 .detail-table--expandable .detail-table__toggle-col {

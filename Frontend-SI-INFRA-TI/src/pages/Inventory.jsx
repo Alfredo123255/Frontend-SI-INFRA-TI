@@ -2,10 +2,79 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Link, useParams, Navigate } from "react-router-dom";
 import StatusBadge from "../components/StatusBadge";
 import { IconMonitor, IconDrive, IconSwitch, IconServerStack, IconDownload, IconChevronDown } from "../components/icons";
-import { servers, storageDevices, switches, chasisBlades } from "../data/inventory";
+import { listarServidores, listarStorage, listarSwitches, listarChasisBlades } from "../api/client";
 import { datacenters, STATUS } from "../data/datacenters";
 import { exportRecordsToCsv, exportRecordsToExcel } from "../utils/exportTable";
 import "./Inventory.css";
+
+function mapEstado(estado) {
+  switch (estado) {
+    case "Encendido":
+      return "online";
+    case "Apagado":
+      return "apagado";
+    case "Degradado":
+      return "warning";
+    default:
+      return "warning";
+  }
+}
+
+function mapServidorRow(dto) {
+  return {
+    id: dto.id,
+    name: dto.hostname,
+    cluster: dto.cluster,
+    dc: dto.ubicacion,
+    model: dto.modelo,
+    tipo: dto.tipo?.toUpperCase(),
+    status: mapEstado(dto.estadoOperativo),
+    ramPct: dto.usoRamPct,
+    cpuPct: dto.usoCpuPct,
+  };
+}
+
+function mapStorageRow(dto) {
+  return {
+    id: dto.id,
+    name: dto.hostname,
+    cluster: dto.cluster,
+    dc: dto.ubicacion,
+    model: dto.modelo,
+    type: dto.protocoloComunicacion,
+    protocol: dto.protocoloComunicacion,
+    status: mapEstado(dto.estadoOperativo),
+    usedTB: dto.capacidadUsadaTB,
+    capacityTB: dto.capacidadTotalTB,
+  };
+}
+
+function mapSwitchRow(dto) {
+  return {
+    id: dto.id,
+    name: dto.hostname,
+    dc: dto.ubicacion,
+    model: dto.modelo,
+    type: dto.tipoRed,
+    status: mapEstado(dto.estadoOperativo),
+    ip: dto.ipGestion,
+    ports: dto.cantidadPuertosTotales,
+    portsUsed: dto.cantidadPuertosOcupados,
+    speed: dto.velocidad ?? "—",
+  };
+}
+
+function mapChasisBladeRow(dto) {
+  return {
+    id: dto.id,
+    name: dto.hostname,
+    cluster: dto.cluster,
+    dc: dto.ubicacion,
+    model: dto.modelo,
+    ip: dto.ipGestion,
+    status: mapEstado(dto.estadoOperativo),
+  };
+}
 
 const EMPTY_FILTERS = { dc: "all", status: "all", cluster: "all", marca: "all", model: "all" };
 
@@ -62,7 +131,7 @@ const columnsByTab = {
   ],
 };
 
-const datasets = { servidores: servers, storage: storageDevices, switches, "chasis-blades": chasisBlades };
+const EMPTY_DATASETS = { servidores: [], storage: [], switches: [], "chasis-blades": [] };
 
 const tabLabels = Object.fromEntries(tabs.map((tab) => [tab.key, tab.label]));
 
@@ -73,9 +142,43 @@ function Inventory() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuRef = useRef(null);
+  const [datasets, setDatasets] = useState(EMPTY_DATASETS);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const rows = datasets[categoria] ?? [];
   const columns = columnsByTab[categoria] ?? [];
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadAll() {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const [servidoresDto, storageDto, switchesDto, chasisDto] = await Promise.all([
+          listarServidores(),
+          listarStorage(),
+          listarSwitches(),
+          listarChasisBlades(),
+        ]);
+        if (cancelled) return;
+        setDatasets({
+          servidores: servidoresDto.map(mapServidorRow),
+          storage: storageDto.map(mapStorageRow),
+          switches: switchesDto.map(mapSwitchRow),
+          "chasis-blades": chasisDto.map(mapChasisBladeRow),
+        });
+      } catch (err) {
+        if (!cancelled) setLoadError(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadAll();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     setQuery("");
@@ -111,9 +214,9 @@ function Inventory() {
     return rows.filter((row) => {
       const matchesQuery =
         query.trim() === "" ||
-        row.name.toLowerCase().includes(query.toLowerCase()) ||
-        row.id.toLowerCase().includes(query.toLowerCase()) ||
-        row.model.toLowerCase().includes(query.toLowerCase());
+        String(row.name ?? "").toLowerCase().includes(query.toLowerCase()) ||
+        String(row.id ?? "").toLowerCase().includes(query.toLowerCase()) ||
+        String(row.model ?? "").toLowerCase().includes(query.toLowerCase());
       const matchesDc = filters.dc === "all" || row.dc === filters.dc;
       const matchesStatus = filters.status === "all" || row.status === filters.status;
       const matchesCluster = filters.cluster === "all" || row.cluster === filters.cluster;
@@ -194,6 +297,14 @@ function Inventory() {
         ))}
       </div>
 
+      {loadError && (
+        <div className="inventory__load-error">
+          No se pudo conectar con el backend ({loadError.message}). Verifica que esté corriendo en{" "}
+          {import.meta.env.VITE_API_URL ?? "http://localhost:8080"}.
+        </div>
+      )}
+      {loading && !loadError && <div className="inventory__loading">Cargando inventario...</div>}
+
       <div className="panel">
         <div className="inventory__toolbar">
           <input
@@ -209,13 +320,11 @@ function Inventory() {
             className="inventory__select"
           >
             <option value="all">Data Center: todos</option>
-            {datacenters
-              .filter((dc) => dcOptions.includes(dc.id))
-              .map((dc) => (
-                <option key={dc.id} value={dc.id}>
-                  {dc.name}
-                </option>
-              ))}
+            {dcOptions.map((dc) => (
+              <option key={dc} value={dc}>
+                {datacenters.find((item) => item.id === dc)?.name ?? dc}
+              </option>
+            ))}
           </select>
           <select
             value={filters.status}
@@ -374,14 +483,19 @@ function renderCell(categoria, row, key) {
   if (key === "ip") return <span className="inventory__mono">{row.ip}</span>;
   if (key === "ports") return `${row.portsUsed}/${row.ports}`;
   if (key === "ramPct") {
-    const realValue = `${Math.round((row.ramPct / 100) * row.ramGB)} / ${row.ramGB} GB`;
+    const realValue =
+      row.ramGB != null ? `${Math.round((row.ramPct / 100) * row.ramGB)} / ${row.ramGB} GB` : null;
     return renderUsageCell(row.ramPct, realValue);
   }
   if (key === "cpuPct") {
-    const realValue = `${Math.round((row.cpuPct / 100) * row.vcpus)} / ${row.vcpus} vCPU`;
+    const realValue =
+      row.vcpus != null ? `${Math.round((row.cpuPct / 100) * row.vcpus)} / ${row.vcpus} vCPU` : null;
     return renderUsageCell(row.cpuPct, realValue);
   }
   if (categoria === "storage" && key === "capacity") {
+    if (row.capacityTB == null) {
+      return <span className="tabular">{row.usedTB} TB usados</span>;
+    }
     const pct = Math.round((row.usedTB / row.capacityTB) * 100);
     return (
       <div className="inventory__capacity">
@@ -408,27 +522,41 @@ function getExportValue(categoria, row, key) {
   if (key === "dc") return dcName(row.dc);
   if (key === "ramGB") return `${row.ramGB} GB`;
   if (key === "ports") return `${row.portsUsed}/${row.ports}`;
-  if (key === "ramPct") return `${row.ramPct}% (${Math.round((row.ramPct / 100) * row.ramGB)}/${row.ramGB} GB)`;
-  if (key === "cpuPct") return `${row.cpuPct}% (${Math.round((row.cpuPct / 100) * row.vcpus)}/${row.vcpus} vCPU)`;
-  if (categoria === "storage" && key === "capacity") return `${row.usedTB}/${row.capacityTB} TB`;
+  if (key === "ramPct") {
+    return row.ramGB != null
+      ? `${row.ramPct}% (${Math.round((row.ramPct / 100) * row.ramGB)}/${row.ramGB} GB)`
+      : `${row.ramPct}%`;
+  }
+  if (key === "cpuPct") {
+    return row.vcpus != null
+      ? `${row.cpuPct}% (${Math.round((row.cpuPct / 100) * row.vcpus)}/${row.vcpus} vCPU)`
+      : `${row.cpuPct}%`;
+  }
+  if (categoria === "storage" && key === "capacity") {
+    return row.capacityTB != null ? `${row.usedTB}/${row.capacityTB} TB` : `${row.usedTB} TB usados`;
+  }
   return row[key];
 }
 
 function renderUsageCell(pct, realValue) {
+  const bar = (
+    <div className="inventory__capacity">
+      <span className="tabular">{pct}%</span>
+      <div className="inventory__capacity-bar">
+        <div
+          className="inventory__capacity-fill"
+          style={{
+            width: `${pct}%`,
+            background: pct > 85 ? "var(--status-warning)" : "var(--accent)",
+          }}
+        />
+      </div>
+    </div>
+  );
+  if (!realValue) return bar;
   return (
     <span className="hover-tip" data-tip={realValue}>
-      <div className="inventory__capacity">
-        <span className="tabular">{pct}%</span>
-        <div className="inventory__capacity-bar">
-          <div
-            className="inventory__capacity-fill"
-            style={{
-              width: `${pct}%`,
-              background: pct > 85 ? "var(--status-warning)" : "var(--accent)",
-            }}
-          />
-        </div>
-      </div>
+      {bar}
     </span>
   );
 }

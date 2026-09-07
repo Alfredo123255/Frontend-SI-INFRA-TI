@@ -13,6 +13,7 @@ const sections = [
   { key: "cpu", title: "CPU" },
   { key: "ram", title: "RAM" },
   { key: "discos", title: "Almacenamiento" },
+  { key: "energia", title: "Energía" },
 ];
 
 const cpuColumns = [
@@ -71,6 +72,16 @@ function buildGeneralInfo(d) {
     { label: "IP del Sistema Operativo", value: d.ip_sistema_operativo },
     { label: "Versión de SO", value: d.version_so },
     { label: "Fecha de Soporte SO", value: d.fecha_soporte_so },
+  ];
+}
+
+function buildEnergiaInfo(d) {
+  return [
+    { label: "Temperatura Actual", value: d.temperatura != null ? `${d.temperatura}°C` : "N/D" },
+    {
+      label: "Consumo Eléctrico",
+      value: d.consumo_electico_w != null ? `${d.consumo_electico_w} W` : "N/D",
+    },
   ];
 }
 
@@ -138,6 +149,8 @@ function renderSectionBody(key, data) {
           <DetailTable columns={discosColumns} rows={mapDiscosRows(data.discos)} />
         </>
       );
+    case "energia":
+      return <DetailInfoGrid items={buildEnergiaInfo(data)} />;
     default:
       return null;
   }

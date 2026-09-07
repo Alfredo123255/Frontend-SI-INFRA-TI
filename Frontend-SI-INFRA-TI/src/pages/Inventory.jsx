@@ -257,9 +257,13 @@ function Inventory() {
     });
   };
 
-  const rowsToExport = someFilteredSelected
-    ? filtered.filter((row) => selectedIds.has(row.id))
-    : filtered;
+  const rowsToExport = filtered.filter((row) => selectedIds.has(row.id));
+  const exportDisabledMessage =
+    filtered.length === 0
+      ? "No hay datos para exportar."
+      : !someFilteredSelected
+        ? "Seleccione al menos un activo para exportar."
+        : null;
 
   const buildExportRecords = () =>
     rowsToExport.map((row) => {
@@ -393,10 +397,11 @@ function Inventory() {
               type="button"
               className="inventory__export-btn"
               onClick={() => setExportMenuOpen((open) => !open)}
-              disabled={filtered.length === 0}
+              disabled={!someFilteredSelected}
+              aria-describedby={exportDisabledMessage ? "inventory-export-disabled" : undefined}
             >
               <IconDownload className="inventory__export-icon" />
-              Exportar{someFilteredSelected ? ` (${selectedIds.size})` : ""}
+              Exportar{someFilteredSelected ? ` (${rowsToExport.length})` : ""}
               <IconChevronDown
                 className={`inventory__export-caret ${exportMenuOpen ? "is-open" : ""}`}
               />
@@ -410,6 +415,11 @@ function Inventory() {
                   Exportar a CSV (.csv)
                 </button>
               </div>
+            )}
+            {exportDisabledMessage && (
+              <span id="inventory-export-disabled" className="inventory__export-empty" role="status">
+                {exportDisabledMessage}
+              </span>
             )}
           </div>
         </div>

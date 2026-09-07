@@ -1,4 +1,6 @@
 export const STATUS = {
+  encendido: { label: "Encendido", color: "var(--status-good)", bg: "var(--status-good-bg)" },
+  degradado: { label: "Degradado", color: "var(--status-warning)", bg: "var(--status-warning-bg)" },
   online: { label: "Operativo", color: "var(--status-good)", bg: "var(--status-good-bg)" },
   warning: { label: "Advertencia", color: "var(--status-warning)", bg: "var(--status-warning-bg)" },
   offline: { label: "Fuera de línea", color: "var(--status-critical)", bg: "var(--status-critical-bg)" },

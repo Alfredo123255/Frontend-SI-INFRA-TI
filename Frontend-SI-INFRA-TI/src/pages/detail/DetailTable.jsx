@@ -1,3 +1,5 @@
+import StatusBadge from "../../components/StatusBadge";
+
 function DetailTable({ columns, rows = [] }) {
   return (
     <div className="detail-table-wrap">
@@ -20,7 +22,9 @@ function DetailTable({ columns, rows = [] }) {
             rows.map((row, index) => (
               <tr key={index}>
                 {columns.map((col) => (
-                  <td key={col.key}>{row[col.key]}</td>
+                  <td key={col.key}>
+                    {col.key === "estado" ? <StatusBadge status={row[col.key]} /> : row[col.key]}
+                  </td>
                 ))}
               </tr>
             ))

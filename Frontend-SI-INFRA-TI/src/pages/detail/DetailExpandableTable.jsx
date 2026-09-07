@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
 import { IconChevronDown } from "../../components/icons";
 import DetailTable from "./DetailTable";
+import StatusBadge from "../../components/StatusBadge";
 
 function DetailExpandableTable({ columns, rows = [], nestedColumns, nestedKey, nestedLabel }) {
   const [openRows, setOpenRows] = useState({});
@@ -44,7 +45,9 @@ function DetailExpandableTable({ columns, rows = [], nestedColumns, nestedKey, n
                     />
                   </td>
                   {columns.map((col) => (
-                    <td key={col.key}>{row[col.key]}</td>
+                    <td key={col.key}>
+                      {col.key === "estado" ? <StatusBadge status={row[col.key]} /> : row[col.key]}
+                    </td>
                   ))}
                 </tr>
                 {isOpen && (

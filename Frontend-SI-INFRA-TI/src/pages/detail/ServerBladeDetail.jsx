@@ -60,7 +60,7 @@ function buildGeneralInfo(d) {
     { label: "Generación", value: d.generacion },
     { label: "Ubicación", value: d.ubicacion },
     { label: "IP de Gestión", value: d.ip_gestion },
-    { label: "Estado Operativo", value: d.estado_operativo },
+    { label: "Estado Operativo", value: d.estado_operativo, type: "estado" },
     { label: "Cluster", value: d.cluster },
     { label: "Responsable", value: d.responsable },
     { label: "Orden de Compra", value: d.orden_compra },

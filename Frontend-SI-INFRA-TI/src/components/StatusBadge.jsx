@@ -2,7 +2,12 @@ import { STATUS } from "../data/datacenters";
 import "./StatusBadge.css";
 
 function StatusBadge({ status, compact = false }) {
-  const meta = STATUS[status] ?? STATUS.online;
+  const key = typeof status === "string" ? status.trim().toLowerCase() : "";
+  const meta = STATUS[key] ?? {
+    label: status || "N/D",
+    color: "var(--text-muted)",
+    bg: "transparent",
+  };
   return (
     <span
       className={`status-badge ${compact ? "status-badge--compact" : ""}`}

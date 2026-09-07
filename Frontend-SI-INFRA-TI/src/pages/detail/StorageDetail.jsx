@@ -97,7 +97,7 @@ function buildGeneralInfo(d) {
     { label: "Responsable", value: d.responsable },
     { label: "Orden de Compra", value: d.orden_compra },
     { label: "Fecha EOS", value: d.fecha_eos },
-    { label: "Fecha EOL", value: d.fecha_eol },
+    { label: "Fecha EOL", value: d.fechaEol },
     { label: "Versión de Firmware", value: d.version_firmware },
     { label: "Última Actualización", value: d.ultima_actualizacion },
     { label: "Protocolo de Comunicación", value: d.protocolo_comunicacion },

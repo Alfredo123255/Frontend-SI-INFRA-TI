@@ -61,7 +61,7 @@ function buildGeneralInfo(d) {
     { label: "Responsable", value: d.responsable },
     { label: "Orden de Compra", value: d.orden_compra },
     { label: "Fecha EOS", value: d.fecha_eos },
-    { label: "Fecha EOL", value: d.fecha_eol },
+    { label: "Fecha EOL", value: d.fechaEol },
     { label: "Versión de Firmware", value: d.version_firmware },
     { label: "Última Actualización", value: d.ultima_actualizacion },
     { label: "Cantidad de Slots", value: d.cantidad_slots },
@@ -127,7 +127,14 @@ function renderSectionBody(key, data) {
                   <span className="slot-list__dot" aria-hidden="true" />
                   {SLOT_ESTADO_LABEL[estadoKey] ?? slot.estado}
                 </span>
-                {slot.hostanameServidor ? (
+                {slot.hostanameServidor && slot.servidorId != null ? (
+                  <Link
+                    to={`/inventario/servidores/blade/${slot.servidorId}`}
+                    className="slot-list__host"
+                  >
+                    {slot.hostanameServidor}
+                  </Link>
+                ) : slot.hostanameServidor ? (
                   <span className="slot-list__host">{slot.hostanameServidor}</span>
                 ) : (
                   <span className="slot-list__host slot-list__host--empty">Sin servidor</span>

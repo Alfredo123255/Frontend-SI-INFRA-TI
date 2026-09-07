@@ -8,6 +8,7 @@ import { exportRecordsToCsv, exportRecordsToExcel } from "../utils/exportTable";
 import "./Inventory.css";
 
 function mapEstado(estado) {
+  if (estado == null || String(estado).trim() === "") return null;
   switch (estado) {
     case "Encendido":
       return "online";
@@ -16,7 +17,7 @@ function mapEstado(estado) {
     case "Degradado":
       return "warning";
     default:
-      return "warning";
+      return null;
   }
 }
 
@@ -93,6 +94,8 @@ const tabs = [
 ];
 
 const dcName = (id) => datacenters.find((dc) => dc.id === id)?.city ?? id;
+const isMissing = (value) => value == null || (typeof value === "string" && value.trim() === "");
+const displayValue = (value) => (isMissing(value) ? "N/A" : value);
 
 const columnsByTab = {
   servidores: [
@@ -490,12 +493,14 @@ function renderCell(categoria, row, key) {
     );
   }
   if (key === "id") return <span className="inventory__mono">{row.id}</span>;
-  if (key === "tipo") return <span className="inventory__tag">{row.tipo}</span>;
-  if (key === "cluster") return <span className="inventory__tag">{row.cluster}</span>;
-  if (key === "dc") return dcName(row.dc);
-  if (key === "ramGB") return `${row.ramGB} GB`;
-  if (key === "ip") return <span className="inventory__mono">{row.ip}</span>;
-  if (key === "ports") return `${row.portsUsed}/${row.ports}`;
+  if (key === "tipo") return <span className="inventory__tag">{displayValue(row.tipo)}</span>;
+  if (key === "cluster") return <span className="inventory__tag">{displayValue(row.cluster)}</span>;
+  if (key === "dc") return displayValue(dcName(row.dc));
+  if (key === "ramGB") return isMissing(row.ramGB) ? "N/A" : `${row.ramGB} GB`;
+  if (key === "ip") return <span className="inventory__mono">{displayValue(row.ip)}</span>;
+  if (key === "ports") {
+    return isMissing(row.portsUsed) || isMissing(row.ports) ? "N/A" : `${row.portsUsed}/${row.ports}`;
+  }
   if (key === "ramPct") {
     const realValue =
       row.ramGB != null ? `${Math.round((row.ramPct / 100) * row.ramGB)} / ${row.ramGB} GB` : null;
@@ -507,6 +512,7 @@ function renderCell(categoria, row, key) {
     return renderUsageCell(row.cpuPct, realValue);
   }
   if (categoria === "storage" && key === "capacity") {
+    if (isMissing(row.usedTB)) return "N/A";
     if (row.capacityTB == null) {
       return <span className="tabular">{row.usedTB} TB usados</span>;
     }
@@ -528,31 +534,37 @@ function renderCell(categoria, row, key) {
       </div>
     );
   }
-  return row[key];
+  return displayValue(row[key]);
 }
 
 function getExportValue(categoria, row, key) {
-  if (key === "status") return STATUS[row.status]?.label ?? row.status;
-  if (key === "dc") return dcName(row.dc);
-  if (key === "ramGB") return `${row.ramGB} GB`;
-  if (key === "ports") return `${row.portsUsed}/${row.ports}`;
+  if (key === "status") return STATUS[row.status]?.label ?? displayValue(row.status);
+  if (key === "dc") return displayValue(dcName(row.dc));
+  if (key === "ramGB") return isMissing(row.ramGB) ? "N/A" : `${row.ramGB} GB`;
+  if (key === "ports") {
+    return isMissing(row.portsUsed) || isMissing(row.ports) ? "N/A" : `${row.portsUsed}/${row.ports}`;
+  }
   if (key === "ramPct") {
+    if (isMissing(row.ramPct)) return "N/A";
     return row.ramGB != null
       ? `${row.ramPct}% (${Math.round((row.ramPct / 100) * row.ramGB)}/${row.ramGB} GB)`
       : `${row.ramPct}%`;
   }
   if (key === "cpuPct") {
+    if (isMissing(row.cpuPct)) return "N/A";
     return row.vcpus != null
       ? `${row.cpuPct}% (${Math.round((row.cpuPct / 100) * row.vcpus)}/${row.vcpus} vCPU)`
       : `${row.cpuPct}%`;
   }
   if (categoria === "storage" && key === "capacity") {
+    if (isMissing(row.usedTB)) return "N/A";
     return row.capacityTB != null ? `${row.usedTB}/${row.capacityTB} TB` : `${row.usedTB} TB usados`;
   }
-  return row[key];
+  return displayValue(row[key]);
 }
 
 function renderUsageCell(pct, realValue) {
+  if (isMissing(pct)) return <span className="tabular">N/A</span>;
   const bar = (
     <div className="inventory__capacity">
       <span className="tabular">{pct}%</span>

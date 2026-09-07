@@ -4,7 +4,7 @@ import "./StatusBadge.css";
 function StatusBadge({ status, compact = false }) {
   const key = typeof status === "string" ? status.trim().toLowerCase() : "";
   const meta = STATUS[key] ?? {
-    label: status || "N/D",
+    label: status || "N/A",
     color: "var(--text-muted)",
     bg: "transparent",
   };

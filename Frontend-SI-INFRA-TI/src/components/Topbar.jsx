@@ -24,6 +24,10 @@ const pageMeta = {
     title: "Dashboard",
     subtitle: "Estado operativo consolidado de la plataforma",
   },
+  "/administrar-equipos": {
+    title: "Administrar equipos",
+    subtitle: "Registro SNMP, mantenimiento y baja de activos",
+  },
 };
 
 const detailMeta = {

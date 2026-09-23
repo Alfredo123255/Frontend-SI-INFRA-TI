@@ -1,0 +1,409 @@
+.ciclo-vida__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ciclo-vida__header h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ciclo-vida__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ciclo-vida__badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ciclo-vida__badge--good {
+  color: var(--status-good);
+  background: var(--status-good-bg);
+}
+
+.ciclo-vida__badge--good .ciclo-vida__badge-dot {
+  background: var(--status-good);
+  box-shadow: 0 0 6px var(--status-good);
+}
+
+.ciclo-vida__badge--warn {
+  color: var(--status-warning);
+  background: var(--status-warning-bg);
+}
+
+.ciclo-vida__badge--warn .ciclo-vida__badge-dot {
+  background: var(--status-warning);
+  box-shadow: 0 0 6px var(--status-warning);
+}
+
+.ciclo-vida__badge--muted {
+  color: var(--text-muted);
+  background: var(--bg-surface-3);
+}
+
+.ciclo-vida__badge--muted .ciclo-vida__badge-dot {
+  background: var(--text-muted);
+}
+
+.ciclo-vida__banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 20px 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+
+.ciclo-vida__banner--mantenimiento {
+  border: 1px solid color-mix(in srgb, var(--status-warning) 45%, transparent);
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+}
+
+.ciclo-vida__banner--mantenimiento svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ciclo-vida__banner--mantenimiento p:first-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ciclo-vida__banner--mantenimiento p:last-child {
+  margin-top: 2px;
+  color: var(--status-warning);
+}
+
+.ciclo-vida__banner--baja {
+  border: 1px solid var(--border);
+  background: var(--bg-surface-2);
+  color: var(--text-secondary);
+}
+
+.ciclo-vida__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.ciclo-vida__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ciclo-vida__row:last-child {
+  border-bottom: none;
+}
+
+.ciclo-vida__row-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ciclo-vida__row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+}
+
+.ciclo-vida__row-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.ciclo-vida__row-icon--amber {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+}
+
+.ciclo-vida__row-icon--red {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+.ciclo-vida__row-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ciclo-vida__row-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ciclo-vida__btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.ciclo-vida__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ciclo-vida__btn--amber {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border-color: color-mix(in srgb, var(--status-warning) 35%, transparent);
+}
+
+.ciclo-vida__btn--amber:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--status-warning-bg) 55%, var(--status-warning) 20%);
+}
+
+.ciclo-vida__btn--red {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+  border-color: color-mix(in srgb, var(--status-critical) 35%, transparent);
+}
+
+.ciclo-vida__btn--red:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--status-critical-bg) 55%, var(--status-critical) 20%);
+}
+
+.ciclo-vida__btn--ghost {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.ciclo-vida__btn--ghost:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+/* Modal */
+
+.ciclo-vida-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(6, 9, 14, 0.55);
+}
+
+.ciclo-vida-modal {
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.ciclo-vida-modal__bar {
+  height: 4px;
+  width: 100%;
+}
+
+.ciclo-vida-modal__bar--amber {
+  background: var(--status-warning);
+}
+
+.ciclo-vida-modal__bar--red {
+  background: var(--status-critical);
+}
+
+.ciclo-vida-modal__bar--accent {
+  background: var(--accent);
+}
+
+.ciclo-vida-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ciclo-vida-modal__head h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ciclo-vida-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ciclo-vida-modal__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ciclo-vida-modal__close:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-secondary);
+}
+
+.ciclo-vida-modal__body {
+  padding: 20px;
+}
+
+.ciclo-vida-modal__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+  font-size: 12px;
+}
+
+.ciclo-vida-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.ciclo-vida-modal__field span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.ciclo-vida-modal__field input,
+.ciclo-vida-modal__field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.ciclo-vida-modal__field textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.ciclo-vida-modal__field input::placeholder,
+.ciclo-vida-modal__field textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.ciclo-vida-modal__field input:focus,
+.ciclo-vida-modal__field textarea:focus {
+  border-color: var(--accent);
+}
+
+.ciclo-vida-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ciclo-vida-modal__cancel {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ciclo-vida-modal__cancel:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+.ciclo-vida-modal__confirm {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ciclo-vida-modal__confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ciclo-vida-modal__confirm--amber {
+  background: var(--status-warning);
+  color: #1a1203;
+}
+
+.ciclo-vida-modal__confirm--amber:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--status-warning) 85%, black);
+}
+
+.ciclo-vida-modal__confirm--red {
+  background: var(--status-critical);
+}
+
+.ciclo-vida-modal__confirm--red:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--status-critical) 85%, black);
+}
+
+.ciclo-vida-modal__confirm--accent {
+  background: var(--accent);
+}
+
+.ciclo-vida-modal__confirm--accent:hover:not(:disabled) {
+  background: var(--accent-strong);
+}

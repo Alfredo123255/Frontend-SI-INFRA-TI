@@ -11,6 +11,7 @@ import {
   IconDrive,
   IconSwitch,
   IconLogo,
+  IconSettings,
 } from "./icons";
 import "./Sidebar.css";
 
@@ -151,6 +152,15 @@ function Sidebar({ collapsed, onToggle }) {
               document.body
             )}
         </div>
+
+        <NavLink
+          to="/administrar-equipos"
+          className={({ isActive }) => `sidebar__item ${isActive ? "is-active" : ""}`}
+          title="Administrar equipos"
+        >
+          <IconSettings className="sidebar__item-icon" />
+          {!collapsed && <span>Administrar equipos</span>}
+        </NavLink>
 
         <NavLink
           to="/dashboard"

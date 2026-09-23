@@ -5,6 +5,7 @@ import Topbar from "./components/Topbar";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
+import AdministrarEquipos from "./pages/AdministrarEquipos";
 import ServerRackDetail from "./pages/detail/ServerRackDetail";
 import ServerBladeDetail from "./pages/detail/ServerBladeDetail";
 import StorageDetail from "./pages/detail/StorageDetail";
@@ -28,6 +29,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/inventario" element={<Navigate to="/inventario/servidores" replace />} />
+            <Route path="/administrar-equipos" element={<AdministrarEquipos />} />
             <Route path="/inventario/servidores/rackeable/:id" element={<ServerRackDetail />} />
             <Route path="/inventario/servidores/blade/:id" element={<ServerBladeDetail />} />
             <Route path="/inventario/storage/:id" element={<StorageDetail />} />

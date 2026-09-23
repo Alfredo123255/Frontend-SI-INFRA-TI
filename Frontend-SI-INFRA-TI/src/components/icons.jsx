@@ -136,3 +136,48 @@ export const IconDownload = (props) => (
     <path d="M4.5 16.5v2.4a1.6 1.6 0 0 0 1.6 1.6h11.8a1.6 1.6 0 0 0 1.6-1.6v-2.4" />
   </svg>
 );
+
+export const IconWifi = (props) => (
+  <svg {...base} {...props}>
+    <path d="M8.1 16.4a5.5 5.5 0 0 1 7.8 0M12 20h.01M4.9 12.9c3.9-3.9 10.2-3.9 14.1 0M1.4 9.4c5.9-5.9 15.4-5.9 21.2 0" />
+  </svg>
+);
+
+export const IconCheck = (props) => (
+  <svg {...base} {...props}>
+    <path d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+export const IconClose = (props) => (
+  <svg {...base} {...props}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+);
+
+export const IconSettings = (props) => (
+  <svg {...base} {...props}>
+    <circle cx="12" cy="12" r="3.2" />
+    <path d="M19.4 13.5c.1-.5.1-1 0-1.5l1.9-1.5-2-3.4-2.2.9a7.5 7.5 0 0 0-1.3-.75L15.5 5h-4l-.3 2.25c-.47.19-.9.45-1.3.75l-2.2-.9-2 3.4 1.9 1.5c-.1.5-.1 1 0 1.5l-1.9 1.5 2 3.4 2.2-.9c.4.3.83.56 1.3.75L11.5 21h4l.3-2.25c.47-.19.9-.45 1.3-.75l2.2.9 2-3.4-1.9-1.5Z" />
+  </svg>
+);
+
+export const IconSearch = (props) => (
+  <svg {...base} {...props}>
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="m20 20-3.6-3.6" />
+  </svg>
+);
+
+export const IconWrench = (props) => (
+  <svg {...base} {...props}>
+    <path d="M20.5 6.5a4.5 4.5 0 0 1-5.86 4.29L7.4 18.03a1.9 1.9 0 1 1-2.69-2.69l7.24-7.24A4.5 4.5 0 0 1 17.5 3.5c.5 0 .98.09 1.42.26a.4.4 0 0 1 .13.65L16.7 6.76l1.3 1.3 2.35-2.35c.2-.2.53-.15.65.13.13.4.2.83.2 1.27" />
+  </svg>
+);
+
+export const IconPower = (props) => (
+  <svg {...base} {...props}>
+    <path d="M12 3.5v7" />
+    <path d="M7.4 6.2a7 7 0 1 0 9.2 0" />
+  </svg>
+);

@@ -1,0 +1,59 @@
+.snmp-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(6, 9, 14, 0.55);
+}
+
+.snmp-modal {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.snmp-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.snmp-modal__close:hover {
+  background: var(--bg-surface-3);
+  color: var(--text-secondary);
+}
+
+.snmp-modal__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.snmp-modal__body {
+  padding: 24px;
+}
+
+.snmp-modal__body .admin-snmp__header {
+  padding-right: 32px;
+}

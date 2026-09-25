@@ -105,7 +105,7 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
             {estado === "mantenimiento" ? (
               <button
                 type="button"
-                className="ciclo-vida__btn ciclo-vida__btn--ghost"
+                className="ciclo-vida__btn ciclo-vida__btn--amber"
                 onClick={() => abrirModal("detener")}
               >
                 Detener mantenimiento

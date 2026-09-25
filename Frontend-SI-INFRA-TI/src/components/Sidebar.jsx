@@ -12,6 +12,8 @@ import {
   IconSwitch,
   IconLogo,
   IconSettings,
+  IconWifi,
+  IconWrench,
 } from "./icons";
 import "./Sidebar.css";
 
@@ -22,21 +24,24 @@ const inventoryLinks = [
   { to: "/inventario/chasis-blades", label: "Chasis Blades", icon: IconServerStack },
 ];
 
-function Sidebar({ collapsed, onToggle }) {
-  const location = useLocation();
-  const isInventoryRoute = location.pathname.startsWith("/inventario");
-  const [inventoryOpen, setInventoryOpen] = useState(isInventoryRoute);
+const adminEquiposLinks = [
+  { to: "/administrar-equipos/snmp", label: "Registrar por SNMP", icon: IconWifi },
+  { to: "/administrar-equipos/ciclo-vida", label: "Bajas y mantenimiento", icon: IconWrench },
+];
+
+function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSidebar }) {
+  const [open, setOpen] = useState(active);
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutPos, setFlyoutPos] = useState({ top: 0, left: 0 });
   const groupRef = useRef(null);
 
-  const handleInventoryClick = () => {
+  const handleClick = () => {
     if (collapsed) {
-      onToggle();
-      setInventoryOpen(true);
+      onExpandSidebar();
+      setOpen(true);
       return;
     }
-    setInventoryOpen((open) => !open);
+    setOpen((o) => !o);
   };
 
   const openFlyout = () => {
@@ -47,6 +52,79 @@ function Sidebar({ collapsed, onToggle }) {
   };
 
   const closeFlyout = () => setFlyoutOpen(false);
+
+  return (
+    <div
+      className="sidebar__group"
+      ref={groupRef}
+      onMouseEnter={openFlyout}
+      onMouseLeave={closeFlyout}
+    >
+      <button
+        type="button"
+        className={`sidebar__item sidebar__item--button ${active ? "is-active" : ""}`}
+        onClick={handleClick}
+        title={label}
+        aria-expanded={open && !collapsed}
+      >
+        <Icon className="sidebar__item-icon" />
+        {!collapsed && (
+          <>
+            <span className="sidebar__item-label">{label}</span>
+            <IconChevronDown className={`sidebar__caret ${open ? "sidebar__caret--open" : ""}`} />
+          </>
+        )}
+      </button>
+
+      {!collapsed && (
+        <div className={`sidebar__submenu ${open ? "sidebar__submenu--open" : ""}`}>
+          <div className="sidebar__submenu-inner">
+            {links.map(({ to, label: subLabel, icon: SubIcon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) => `sidebar__subitem ${isActive ? "is-active" : ""}`}
+              >
+                <SubIcon className="sidebar__subitem-icon" />
+                <span>{subLabel}</span>
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {collapsed &&
+        flyoutOpen &&
+        createPortal(
+          <div
+            className="sidebar__flyout"
+            style={{ top: flyoutPos.top, left: flyoutPos.left }}
+            onMouseEnter={openFlyout}
+            onMouseLeave={closeFlyout}
+          >
+            <div className="sidebar__flyout-title">{label}</div>
+            {links.map(({ to, label: subLabel, icon: SubIcon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) => `sidebar__flyout-item ${isActive ? "is-active" : ""}`}
+                onClick={closeFlyout}
+              >
+                <SubIcon className="sidebar__subitem-icon" />
+                <span>{subLabel}</span>
+              </NavLink>
+            ))}
+          </div>,
+          document.body
+        )}
+    </div>
+  );
+}
+
+function Sidebar({ collapsed, onToggle }) {
+  const location = useLocation();
+  const isInventoryRoute = location.pathname.startsWith("/inventario");
+  const isAdminRoute = location.pathname.startsWith("/administrar-equipos");
 
   return (
     <aside className={`sidebar ${collapsed ? "sidebar--collapsed" : ""}`}>
@@ -82,85 +160,23 @@ function Sidebar({ collapsed, onToggle }) {
           {!collapsed && <span>Inicio</span>}
         </NavLink>
 
-        <div
-          className="sidebar__group"
-          ref={groupRef}
-          onMouseEnter={openFlyout}
-          onMouseLeave={closeFlyout}
-        >
-          <button
-            type="button"
-            className={`sidebar__item sidebar__item--button ${isInventoryRoute ? "is-active" : ""}`}
-            onClick={handleInventoryClick}
-            title="Inventario"
-            aria-expanded={inventoryOpen && !collapsed}
-          >
-            <IconServerStack className="sidebar__item-icon" />
-            {!collapsed && (
-              <>
-                <span className="sidebar__item-label">Inventario</span>
-                <IconChevronDown
-                  className={`sidebar__caret ${inventoryOpen ? "sidebar__caret--open" : ""}`}
-                />
-              </>
-            )}
-          </button>
+        <SidebarGroup
+          icon={IconServerStack}
+          label="Inventario"
+          links={inventoryLinks}
+          active={isInventoryRoute}
+          collapsed={collapsed}
+          onExpandSidebar={onToggle}
+        />
 
-          {!collapsed && (
-            <div className={`sidebar__submenu ${inventoryOpen ? "sidebar__submenu--open" : ""}`}>
-              <div className="sidebar__submenu-inner">
-                {inventoryLinks.map(({ to, label, icon: Icon }) => (
-                  <NavLink
-                    key={to}
-                    to={to}
-                    className={({ isActive }) =>
-                      `sidebar__subitem ${isActive ? "is-active" : ""}`
-                    }
-                  >
-                    <Icon className="sidebar__subitem-icon" />
-                    <span>{label}</span>
-                  </NavLink>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {collapsed &&
-            flyoutOpen &&
-            createPortal(
-              <div
-                className="sidebar__flyout"
-                style={{ top: flyoutPos.top, left: flyoutPos.left }}
-                onMouseEnter={openFlyout}
-                onMouseLeave={closeFlyout}
-              >
-                <div className="sidebar__flyout-title">Inventario</div>
-                {inventoryLinks.map(({ to, label, icon: Icon }) => (
-                  <NavLink
-                    key={to}
-                    to={to}
-                    className={({ isActive }) =>
-                      `sidebar__flyout-item ${isActive ? "is-active" : ""}`
-                    }
-                    onClick={closeFlyout}
-                  >
-                    <Icon className="sidebar__subitem-icon" />
-                    <span>{label}</span>
-                  </NavLink>
-                ))}
-              </div>,
-              document.body
-            )}
-        </div>
-
-        <NavLink
-          to="/administrar-equipos"
-          className={({ isActive }) => `sidebar__item ${isActive ? "is-active" : ""}`}
-          title="Administrar equipos"
-        >
-          <IconSettings className="sidebar__item-icon" />
-          {!collapsed && <span>Administrar equipos</span>}
-        </NavLink>
+        <SidebarGroup
+          icon={IconSettings}
+          label="Administrar equipos"
+          links={adminEquiposLinks}
+          active={isAdminRoute}
+          collapsed={collapsed}
+          onExpandSidebar={onToggle}
+        />
 
         <NavLink
           to="/dashboard"

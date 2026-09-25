@@ -6,6 +6,10 @@
   margin: 0 auto;
 }
 
+.admin-equipos--wide {
+  max-width: 900px;
+}
+
 /* SNMP card */
 
 .admin-snmp {
@@ -93,6 +97,47 @@
   border-color: var(--accent);
 }
 
+.admin-snmp__password-wrap {
+  position: relative;
+}
+
+.admin-snmp__password-wrap input {
+  padding-right: 38px;
+}
+
+.admin-snmp__password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.admin-snmp__password-toggle:hover {
+  background: var(--bg-surface-3);
+  color: var(--text-secondary);
+}
+
+.admin-snmp__password-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.admin-snmp__field-error {
+  font-size: 11.5px;
+  color: var(--status-critical);
+}
+
 .admin-snmp__footer {
   display: flex;
   align-items: center;
@@ -108,6 +153,29 @@
   color: var(--text-muted);
 }
 
+.admin-snmp__footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-snmp__cancel {
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--status-critical) 45%, transparent);
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-snmp__cancel:hover {
+  background: color-mix(in srgb, var(--status-critical-bg) 55%, var(--status-critical) 20%);
+}
+
 .admin-snmp__submit {
   padding: 9px 16px;
   border-radius: var(--radius-md);
@@ -121,8 +189,13 @@
   transition: background 0.15s ease;
 }
 
-.admin-snmp__submit:hover {
+.admin-snmp__submit:hover:not(:disabled) {
   background: var(--accent-strong);
+}
+
+.admin-snmp__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .admin-snmp__exito {
@@ -186,9 +259,16 @@
   box-shadow: 0 0 6px var(--status-warning);
 }
 
+.admin-snmp__exito-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
 .admin-snmp__reset {
-  display: block;
-  margin: 20px auto 0;
   padding: 9px 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
@@ -197,12 +277,22 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .admin-snmp__reset:hover {
   background: var(--bg-surface-2);
   color: var(--text-primary);
+}
+
+.admin-snmp__reset--primary {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent-strong);
+}
+
+.admin-snmp__reset--primary:hover {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 /* Lifecycle section */
@@ -370,6 +460,110 @@
   letter-spacing: 0.03em;
 }
 
+/* Tabla de equipos en mantenimiento activo */
+
+.admin-mant-tabla {
+  padding: 20px;
+}
+
+.admin-mant-tabla__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-mant-tabla__head h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-mant-tabla__head p {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.admin-mant-tabla__search {
+  width: 240px;
+  flex-shrink: 0;
+}
+
+.admin-mant-tabla__wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.admin-mant-tabla__table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-mant-tabla__table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  background: var(--bg-surface-2);
+  white-space: nowrap;
+}
+
+.admin-mant-tabla__table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+.admin-mant-tabla__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-mant-tabla__table tbody tr:hover td {
+  background: var(--bg-surface-2);
+}
+
+.admin-mant-tabla__equipo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.admin-mant-tabla__equipo-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-mant-tabla__desc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 320px;
+  font-size: 12.5px;
+}
+
+.admin-mant-tabla__resp {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-mant-tabla__empty {
+  text-align: center;
+  padding: 28px 16px;
+  color: var(--text-muted);
+}
+
 @media (max-width: 560px) {
   .admin-snmp__grid {
     grid-template-columns: 1fr;
@@ -377,5 +571,9 @@
 
   .admin-snmp__field--full {
     grid-column: auto;
+  }
+
+  .admin-mant-tabla__search {
+    width: 100%;
   }
 }

@@ -8,9 +8,9 @@ API: `http://localhost:8080`
 
 | Resultado | Cantidad |
 |---|---:|
-| Aprobado | 46 |
+| Aprobado | 51 |
 | Fallido | 1 |
-| No ejecutable por falta de datos de prueba | 5 |
+| No ejecutable por falta de datos de prueba | 0 |
 | Total | 52 |
 
 Los casos se ejecutaron sobre los datos disponibles en el ambiente local. Los casos marcados como no ejecutables requieren una precondición que no existe actualmente, como inventarios vacíos o activos con campos específicos sin registrar. No se modificaron datos del backend para fabricar esas condiciones.
@@ -61,16 +61,16 @@ Los casos se ejecutaron sobre los datos disponibles en el ambiente local. Los ca
 | CP-040 | Aprobado | `sw-incompleto01` muestra el estado general como `N/D` y conserva correctamente los estados Encendido y Apagado de sus puertos. |
 | CP-041 | Aprobado | Los activos incompletos muestran responsable y dejan vacíos orden de compra, EOL y EOS sin producir errores. |
 | CP-042 | Aprobado | Los activos incompletos cargan sus fichas y dejan vacíos versión de firmware y última actualización sin producir errores. |
-| CP-043 | No ejecutable | El ambiente contiene 11 servidores y no ofrece una condición de inventario de servidores vacío. |
-| CP-044 | No ejecutable | El ambiente contiene 23 activos y no ofrece una condición de inventario completamente vacío. |
+| CP-043 | Aprobado | Con el backend apagado, Servidores muestra `0 de 0`, conserva los encabezados y presenta el mensaje `No se encontraron equipos con los filtros actuales.` |
+| CP-044 | Aprobado | Con el backend apagado, las cuatro categorías quedan en `0 de 0`, conservan sus encabezados y presentan el estado sin equipos. |
 | CP-045 | Aprobado | La ficha de `srv-incompleto01` abre sin bloquearse y muestra `N/A` en los campos generales faltantes; sus porcentajes de RAM y CPU también aparecen como `N/A` en el listado. |
 | CP-046 | Aprobado | `chs-vacio01` abre normalmente y muestra sus cuatro slots como Libres y Sin servidor, sin datos inconsistentes. |
-| CP-047 | No ejecutable | El ambiente contiene 5 unidades de storage. |
-| CP-048 | No ejecutable | El ambiente contiene 5 switches. |
+| CP-047 | Aprobado | Con el backend apagado, Storage muestra `0 de 0`, conserva los encabezados y presenta el mensaje de que no se encontraron equipos. |
+| CP-048 | Aprobado | Con el backend apagado, Switches muestra `0 de 0`, conserva los encabezados y presenta el mensaje de que no se encontraron equipos. |
 | CP-049 | Aprobado | Las controladoras RAID se muestran con modelo, RAID, serie y estado en servidor `9` y storage `16`. |
 | CP-050 | Aprobado | En `srv-app01`, sin controladoras RAID, la tabla muestra un mensaje de componentes no registrados y el resto de la ficha carga normalmente. |
 | CP-051 | Aprobado | El listado muestra hostname, clúster, ubicación, modelo, IP de gestión y estado; `chs-vacio01` presenta su IP faltante como `N/A`. |
-| CP-052 | No ejecutable | El ambiente contiene 2 chasis blade y no ofrece una condición de inventario de chasis vacío. |
+| CP-052 | Aprobado | Con el backend apagado, Chasis Blades muestra `0 de 0`, conserva los encabezados y presenta el mensaje de que no se encontraron equipos. |
 
 ## Defectos encontrados
 
@@ -78,4 +78,4 @@ Los casos se ejecutaron sobre los datos disponibles en el ambiente local. Los ca
 
 ## Datos de prueba faltantes
 
-Para ejecutar los 5 casos pendientes se requiere un ambiente controlado con inventarios vacíos de servidores, storage, switches, chasis y de todos los activos en conjunto.
+No quedaron casos sin ejecutar. Las pruebas de inventario vacío se realizaron con el backend apagado, según la condición solicitada para esta ejecución.

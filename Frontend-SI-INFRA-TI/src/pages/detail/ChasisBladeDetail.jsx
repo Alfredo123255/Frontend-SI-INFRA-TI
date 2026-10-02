@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { IconChevronLeft, IconChevronDown } from "../../components/icons";
+import { IconChevronLeft, IconChevronDown, IconWifi } from "../../components/icons";
 import SectionSideNav from "../../components/SectionSideNav";
+import SnmpConexionModal from "../administrar-equipos/SnmpConexionModal";
 import DetailInfoGrid from "./DetailInfoGrid";
 import DetailTable from "./DetailTable";
 import DetailExpandableTable from "./DetailExpandableTable";
@@ -179,6 +180,7 @@ function ChasisBladeDetail() {
   const [openSections, setOpenSections] = useState(() =>
     Object.fromEntries(sections.map((section) => [section.key, true]))
   );
+  const [snmpModalOpen, setSnmpModalOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -221,17 +223,38 @@ function ChasisBladeDetail() {
               const isOpen = openSections[section.key];
               return (
                 <div key={section.key} id={section.key} className="panel server-detail__section">
-                  <button
-                    type="button"
-                    className="server-detail__section-header"
-                    onClick={() => toggleSection(section.key)}
-                    aria-expanded={isOpen}
-                  >
-                    <h2>{section.title}</h2>
-                    <IconChevronDown
-                      className={`server-detail__section-caret ${isOpen ? "is-open" : ""}`}
-                    />
-                  </button>
+                  <div className={`server-detail__section-header ${isOpen ? "is-open" : ""}`}>
+                    <button
+                      type="button"
+                      className="server-detail__section-title-btn"
+                      onClick={() => toggleSection(section.key)}
+                      aria-expanded={isOpen}
+                    >
+                      <h2>{section.title}</h2>
+                    </button>
+                    <div className="server-detail__section-header-actions">
+                      {section.key === "general" && (
+                        <button
+                          type="button"
+                          className="detail-general-actions__btn"
+                          onClick={() => setSnmpModalOpen(true)}
+                        >
+                          <IconWifi className="detail-general-actions__icon" />
+                          Editar Conexión SNMP
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="server-detail__section-toggle-btn"
+                        onClick={() => toggleSection(section.key)}
+                        aria-label={isOpen ? "Colapsar sección" : "Expandir sección"}
+                      >
+                        <IconChevronDown
+                          className={`server-detail__section-caret ${isOpen ? "is-open" : ""}`}
+                        />
+                      </button>
+                    </div>
+                  </div>
                   {isOpen && (
                     <div className="server-detail__section-body">
                       {renderSectionBody(section.key, data)}
@@ -248,6 +271,8 @@ function ChasisBladeDetail() {
           />
         </>
       )}
+
+      <SnmpConexionModal open={snmpModalOpen} onClose={() => setSnmpModalOpen(false)} />
     </div>
   );
 }

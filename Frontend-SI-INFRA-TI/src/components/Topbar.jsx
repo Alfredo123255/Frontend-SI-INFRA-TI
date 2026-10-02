@@ -24,6 +24,14 @@ const pageMeta = {
     title: "Dashboard",
     subtitle: "Estado operativo consolidado de la plataforma",
   },
+  "/administrar-equipos/snmp": {
+    title: "Administrar equipos · Registrar por SNMP",
+    subtitle: "Conecta un nuevo activo para monitoreo automático",
+  },
+  "/administrar-equipos/ciclo-vida": {
+    title: "Administrar equipos · Bajas y mantenimiento",
+    subtitle: "Gestiona el ciclo de vida de los activos del inventario",
+  },
 };
 
 const detailMeta = {

@@ -6,7 +6,12 @@ import SnmpConexionModal from "../administrar-equipos/SnmpConexionModal";
 import DetailInfoGrid from "./DetailInfoGrid";
 import DetailTable from "./DetailTable";
 import DetailExpandableTable from "./DetailExpandableTable";
+import MaintenanceNotice from "./MaintenanceNotice";
+import SnmpConnectionNotice from "./SnmpConnectionNotice";
+import HistorialActivoLink from "./HistorialActivoLink";
+import DatosGeneralesEditables from "./DatosGeneralesEditables";
 import { obtenerStorage } from "../../api/client";
+import { potenciaFuenteW } from "./potenciaFuente";
 import "./DetailPlaceholder.css";
 import "./ServerRackDetail.css";
 
@@ -72,6 +77,7 @@ const redPuertosColumns = [
 ];
 
 const fansColumns = [
+  { key: "numeroSerial", label: "Número de Serie" },
   { key: "modelo", label: "Modelo" },
   { key: "velocidadRpm", label: "Velocidad (RPM)" },
   { key: "estado", label: "Estado" },
@@ -100,7 +106,7 @@ function buildGeneralInfo(d) {
     { label: "Fecha EOS", value: d.fecha_eos },
     { label: "Fecha EOL", value: d.fechaEol },
     { label: "Versión de Firmware", value: d.version_firmware },
-    { label: "Última Actualización", value: d.ultima_actualizacion },
+    { label: "Última Actualización", value: d.ultima_actualizacion, type: "fechaHoraUtc" },
     { label: "Protocolo de Comunicación", value: d.protocolo_comunicacion },
     { label: "Capacidad Total (TB)", value: d.capacidad_total_TB },
     { label: "Capacidad Usada (TB)", value: d.capacidad_usada_TB },
@@ -192,7 +198,7 @@ function mapFuentesEnergia(list = []) {
   return list.map((f) => ({
     numeroSerial: f.numero_serial,
     modelo: f.modelo,
-    consumoW: f.consumo_w,
+    consumoW: potenciaFuenteW(f),
     tipoCorriente: f.tipo_corriente,
     estado: f.estado,
   }));
@@ -280,6 +286,8 @@ function StorageDetail() {
         Volver a Storage
       </Link>
       <h1 className="server-detail__title">Storage {data?.hostname ?? id}</h1>
+      <MaintenanceNotice active={data?.mantenimientoActivo === true} />
+      {data && <SnmpConnectionNotice activoId={id} enMantenimiento={data.mantenimientoActivo === true} />}
 
       {error && <p className="detail-placeholder__error">No se pudo cargar el storage ({error.message}).</p>}
       {loading && !error && <p>Cargando...</p>}
@@ -302,13 +310,16 @@ function StorageDetail() {
                     </button>
                     <div className="server-detail__section-header-actions">
                       {section.key === "general" && (
+                        <HistorialActivoLink activoId={id} />
+                      )}
+                      {section.key === "general" && (
                         <button
                           type="button"
                           className="detail-general-actions__btn"
                           onClick={() => setSnmpModalOpen(true)}
                         >
                           <IconWifi className="detail-general-actions__icon" />
-                          Editar Conexión SNMP
+                          Editar conexión SNMP
                         </button>
                       )}
                       <button
@@ -325,7 +336,11 @@ function StorageDetail() {
                   </div>
                   {isOpen && (
                     <div className="server-detail__section-body">
-                      {renderSectionBody(section.key, data)}
+                      {section.key === "general" ? (
+                        <DatosGeneralesEditables activoId={id} tipo="storage"
+                          items={buildGeneralInfo(data)}
+                          onSaved={(campos) => setData((actual) => ({ ...actual, ...campos }))} />
+                      ) : renderSectionBody(section.key, data)}
                     </div>
                   )}
                 </div>
@@ -340,7 +355,9 @@ function StorageDetail() {
         </>
       )}
 
-      <SnmpConexionModal open={snmpModalOpen} onClose={() => setSnmpModalOpen(false)} />
+      <SnmpConexionModal open={snmpModalOpen} activoId={id}
+        onClose={() => setSnmpModalOpen(false)}
+        onSaved={(conexion) => setData((actual) => ({ ...actual, ip_gestion: conexion.ipGestion }))} />
     </div>
   );
 }

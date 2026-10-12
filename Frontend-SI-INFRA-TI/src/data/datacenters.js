@@ -5,6 +5,7 @@ export const STATUS = {
   warning: { label: "Advertencia", color: "var(--status-warning)", bg: "var(--status-warning-bg)" },
   offline: { label: "Fuera de línea", color: "var(--status-critical)", bg: "var(--status-critical-bg)" },
   apagado: { label: "Apagado", color: "var(--status-critical)", bg: "var(--status-critical-bg)" },
+  baja: { label: "Baja", color: "#f28c28", bg: "rgba(242, 140, 40, 0.16)" },
 };
 
 export const datacenters = [

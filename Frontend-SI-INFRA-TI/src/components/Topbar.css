@@ -65,7 +65,12 @@
   font-weight: 500;
   border: 1px solid var(--border);
   white-space: nowrap;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.15s ease;
 }
+
+.topbar__status:hover { filter: brightness(1.2); transform: translateY(-1px); }
+.topbar__status:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 .topbar__status-dot {
   width: 7px;

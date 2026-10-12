@@ -6,7 +6,12 @@ import SnmpConexionModal from "../administrar-equipos/SnmpConexionModal";
 import DetailInfoGrid from "./DetailInfoGrid";
 import DetailTable from "./DetailTable";
 import DetailExpandableTable from "./DetailExpandableTable";
+import MaintenanceNotice from "./MaintenanceNotice";
+import SnmpConnectionNotice from "./SnmpConnectionNotice";
+import HistorialActivoLink from "./HistorialActivoLink";
+import DatosGeneralesEditables from "./DatosGeneralesEditables";
 import { obtenerChasisBlade } from "../../api/client";
+import { potenciaFuenteW } from "./potenciaFuente";
 import "./DetailPlaceholder.css";
 import "./ServerRackDetail.css";
 
@@ -27,7 +32,7 @@ const fuentesPoderColumns = [
 
 const fansColumns = [
   { key: "modelo", label: "Modelo" },
-  { key: "velocidadRpm", label: "Velocidad (RPM)" },
+  { key: "velocidadRpm", label: "Velocidad" },
   { key: "estado", label: "Estado" },
 ];
 
@@ -64,7 +69,7 @@ function buildGeneralInfo(d) {
     { label: "Fecha EOS", value: d.fecha_eos },
     { label: "Fecha EOL", value: d.fechaEol },
     { label: "Versión de Firmware", value: d.version_firmware },
-    { label: "Última Actualización", value: d.ultima_actualizacion },
+    { label: "Última Actualización", value: d.ultima_actualizacion, type: "fechaHoraUtc" },
     { label: "Cantidad de Slots", value: d.cantidad_slots },
   ];
 }
@@ -80,7 +85,7 @@ function mapFuentesEnergia(list = []) {
   return list.map((f) => ({
     numeroSerial: f.numero_serial,
     modelo: f.modelo,
-    consumoW: f.consumo_w,
+    consumoW: potenciaFuenteW(f),
     tipoCorriente: f.tipo_corriente,
     estado: f.estado,
   }));
@@ -90,7 +95,9 @@ function mapFansRows(ventiladores = []) {
   return ventiladores.map((v) => ({
     numeroSerial: v.numero_serial,
     modelo: v.modelo,
-    velocidadRpm: v.velocidad_rpm,
+    velocidadRpm: v.velocidad_rpm != null
+      ? `${v.velocidad_rpm} RPM`
+      : v.estado?.toLowerCase() === "encendido" ? 100 : null,
     estado: v.estado,
   }));
 }
@@ -117,20 +124,22 @@ function renderSectionBody(key, data) {
     case "slots":
       return (
         <ul className="slot-list">
-          {(data.chasisSlots ?? []).map((slot) => {
+          {[...(data.chasisSlots ?? [])].sort((a, b) => a.numeroSlot - b.numeroSlot).map((slot) => {
             const estadoKey = (slot.estado ?? "").toLowerCase();
+            const estadoVisual = estadoKey === "degradado" ? "alertado" : estadoKey;
+            const servidorId = slot.servidorId;
             return (
               <li key={slot.id ?? slot.numeroSlot} className="slot-list__row">
                 <span className="slot-list__num">
                   Slot {String(slot.numeroSlot).padStart(2, "0")}
                 </span>
-                <span className={`slot-list__state slot-list__state--${estadoKey}`}>
+                <span className={`slot-list__state slot-list__state--${estadoVisual}`}>
                   <span className="slot-list__dot" aria-hidden="true" />
                   {SLOT_ESTADO_LABEL[estadoKey] ?? slot.estado}
                 </span>
-                {slot.hostanameServidor && slot.servidorId != null ? (
+                {slot.hostanameServidor && servidorId != null ? (
                   <Link
-                    to={`/inventario/servidores/blade/${slot.servidorId}`}
+                    to={`/inventario/servidores/blade/${servidorId}`}
                     className="slot-list__host"
                   >
                     {slot.hostanameServidor}
@@ -139,6 +148,11 @@ function renderSectionBody(key, data) {
                   <span className="slot-list__host">{slot.hostanameServidor}</span>
                 ) : (
                   <span className="slot-list__host slot-list__host--empty">Sin servidor</span>
+                )}
+                {servidorId != null && slot.hostanameServidor && (
+                  <Link to={`/inventario/servidores/blade/${servidorId}`} className="slot-list__action">
+                    Ver ficha →
+                  </Link>
                 )}
               </li>
             );
@@ -186,18 +200,26 @@ function ChasisBladeDetail() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    obtenerChasisBlade(id)
-      .then((dto) => {
-        if (!cancelled) setData(dto);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const cargar = (inicial = false) => {
+      obtenerChasisBlade(id)
+        .then((dto) => {
+          if (!cancelled) {
+            setData(dto);
+            setError(null);
+          }
+        })
+        .catch((err) => {
+          if (!cancelled && inicial) setError(err);
+        })
+        .finally(() => {
+          if (!cancelled && inicial) setLoading(false);
+        });
+    };
+    cargar(true);
+    const timer = window.setInterval(() => cargar(), 30_000);
     return () => {
       cancelled = true;
+      window.clearInterval(timer);
     };
   }, [id]);
 
@@ -212,6 +234,8 @@ function ChasisBladeDetail() {
         Volver a Chasis Blades
       </Link>
       <h1 className="server-detail__title">Chasis Blade {data?.hostname ?? id}</h1>
+      <MaintenanceNotice active={data?.mantenimientoActivo === true} />
+      {data && <SnmpConnectionNotice activoId={id} enMantenimiento={data.mantenimientoActivo === true} />}
 
       {error && <p className="detail-placeholder__error">No se pudo cargar el chasis ({error.message}).</p>}
       {loading && !error && <p>Cargando...</p>}
@@ -234,13 +258,16 @@ function ChasisBladeDetail() {
                     </button>
                     <div className="server-detail__section-header-actions">
                       {section.key === "general" && (
+                        <HistorialActivoLink activoId={id} />
+                      )}
+                      {section.key === "general" && (
                         <button
                           type="button"
                           className="detail-general-actions__btn"
                           onClick={() => setSnmpModalOpen(true)}
                         >
                           <IconWifi className="detail-general-actions__icon" />
-                          Editar Conexión SNMP
+                          Editar conexión SNMP
                         </button>
                       )}
                       <button
@@ -257,7 +284,11 @@ function ChasisBladeDetail() {
                   </div>
                   {isOpen && (
                     <div className="server-detail__section-body">
-                      {renderSectionBody(section.key, data)}
+                      {section.key === "general" ? (
+                        <DatosGeneralesEditables activoId={id} tipo="chasis"
+                          items={buildGeneralInfo(data)}
+                          onSaved={(campos) => setData((actual) => ({ ...actual, ...campos }))} />
+                      ) : renderSectionBody(section.key, data)}
                     </div>
                   )}
                 </div>
@@ -272,7 +303,9 @@ function ChasisBladeDetail() {
         </>
       )}
 
-      <SnmpConexionModal open={snmpModalOpen} onClose={() => setSnmpModalOpen(false)} />
+      <SnmpConexionModal open={snmpModalOpen} activoId={id}
+        onClose={() => setSnmpModalOpen(false)}
+        onSaved={(conexion) => setData((actual) => ({ ...actual, ip_gestion: conexion.ipGestion }))} />
     </div>
   );
 }

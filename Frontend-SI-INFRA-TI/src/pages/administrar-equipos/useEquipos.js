@@ -12,6 +12,7 @@ export function useEquipos() {
   const [equipos, setEquipos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +34,7 @@ export function useEquipos() {
             hostname: dto.hostname,
             categoria,
             categoriaLabel: CATEGORIA_LABEL[categoria],
+            estadoOperativo: dto.estadoOperativo ?? dto.estado_operativo,
           }));
         setEquipos([
           ...build(servidores, "servidores"),
@@ -50,7 +52,7 @@ export function useEquipos() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadToken]);
 
-  return { equipos, loading, error };
+  return { equipos, loading, error, refrescar: () => setReloadToken((value) => value + 1) };
 }

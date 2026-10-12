@@ -320,13 +320,13 @@
 }
 
 .slot-list__state--alertado {
-  color: var(--status-warning);
-  background: var(--status-warning-bg);
+  color: #f28c28;
+  background: rgba(242, 140, 40, 0.16);
 }
 
 .slot-list__state--alertado .slot-list__dot {
-  background: var(--status-warning);
-  box-shadow: 0 0 6px var(--status-warning);
+  background: #f28c28;
+  box-shadow: 0 0 6px #f28c28;
 }
 
 .slot-list__host {
@@ -342,6 +342,17 @@ a.slot-list__host:hover {
   color: var(--accent-strong);
   text-decoration: underline;
 }
+
+.slot-list__action {
+  justify-self: end;
+  color: var(--accent-strong);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.slot-list__action:hover { text-decoration: underline; }
 
 .slot-list__host--empty {
   color: var(--text-muted);
@@ -363,6 +374,11 @@ a.slot-list__host:hover {
 
   .slot-list__host {
     grid-column: 1 / -1;
+  }
+
+  .slot-list__action {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 
   .slot-list__ip {

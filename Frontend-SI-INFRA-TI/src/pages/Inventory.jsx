@@ -16,6 +16,8 @@ function mapEstado(estado) {
       return "apagado";
     case "Degradado":
       return "warning";
+    case "Baja":
+      return "baja";
     default:
       return null;
   }

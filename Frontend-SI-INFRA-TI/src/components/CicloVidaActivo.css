@@ -407,3 +407,8 @@
 .ciclo-vida-modal__confirm--accent:hover:not(:disabled) {
   background: var(--accent-strong);
 }
+.ciclo-vida-modal__error {
+  margin: 0;
+  color: #f87171;
+  font-size: 0.875rem;
+}

@@ -1,0 +1,38 @@
+.snmp-edit__identity {
+  margin: 4px 0 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.snmp-edit__message,
+.snmp-edit__hint {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.snmp-edit__hint { margin: 16px 0; line-height: 1.5; }
+.snmp-edit__actions { justify-content: flex-end; margin-top: 20px; }
+
+.snmp-edit__confirmation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px 20px;
+  text-align: center;
+}
+
+.snmp-edit__confirmation-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.snmp-edit__confirmation-icon svg { width: 26px; height: 26px; }
+.snmp-edit__confirmation h2 { margin: 0; font-size: 18px; color: var(--text-primary); }
+.snmp-edit__confirmation p { margin: 0 0 8px; color: var(--text-secondary); font-size: 13px; }

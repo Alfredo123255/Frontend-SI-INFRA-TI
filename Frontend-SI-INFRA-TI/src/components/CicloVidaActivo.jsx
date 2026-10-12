@@ -32,29 +32,42 @@ const ESTADO_META = {
   baja: { label: "Baja", clase: "ciclo-vida__badge--muted" },
 };
 
-function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }) {
+function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja, saving = false }) {
   const [modalTipo, setModalTipo] = useState(null);
   const [responsable, setResponsable] = useState("");
   const [motivo, setMotivo] = useState("");
+  const [mensajeValidacion, setMensajeValidacion] = useState("");
 
   const abrirModal = (tipo) => {
     setModalTipo(tipo);
     setResponsable("");
     setMotivo("");
+    setMensajeValidacion("");
   };
 
-  const cerrarModal = () => setModalTipo(null);
+  const cerrarModal = () => { if (!saving) setModalTipo(null); };
 
-  const puedeConfirmar = responsable.trim() !== "" && motivo.trim() !== "";
-
-  const confirmarModal = () => {
-    if (!puedeConfirmar) return;
-
-    if (modalTipo === "iniciar") onIniciar(responsable, motivo);
-    else if (modalTipo === "detener") onDetener(responsable, motivo);
-    else if (modalTipo === "baja") onBaja(responsable, motivo);
-
-    cerrarModal();
+  const confirmarModal = async () => {
+    if (saving) return;
+    if (!responsable.trim()) {
+      setMensajeValidacion("El responsable es obligatorio.");
+      return;
+    }
+    if (!motivo.trim()) {
+      setMensajeValidacion(modalTipo === "iniciar"
+        ? "El motivo del mantenimiento es obligatorio."
+        : "El motivo es obligatorio.");
+      return;
+    }
+    setMensajeValidacion("");
+    try {
+      if (modalTipo === "iniciar") await onIniciar(responsable, motivo);
+      else if (modalTipo === "detener") await onDetener(responsable, motivo);
+      else if (modalTipo === "baja" && onBaja) await onBaja(responsable, motivo);
+      setModalTipo(null);
+    } catch {
+      // La página muestra el error y conserva el formulario abierto.
+    }
   };
 
   const cfg = modalTipo ? MODAL_CONFIG[modalTipo] : null;
@@ -77,7 +90,7 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
             <div>
               <p>Mantenimiento en curso</p>
               <p>
-                {mantenimiento.responsable} — {mantenimiento.motivo}
+                {mantenimiento.descripcion ?? "El activo está marcado para mantenimiento."}
               </p>
             </div>
           </div>
@@ -97,9 +110,7 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
               </span>
               <div>
                 <p className="ciclo-vida__row-title">Mantenimiento</p>
-                <p className="ciclo-vida__row-desc">
-                  Suspende las alertas sin dar de baja el activo.
-                </p>
+                <p className="ciclo-vida__row-desc">Marca el activo en mantenimiento sin darlo de baja.</p>
               </div>
             </div>
             {estado === "mantenimiento" ? (
@@ -107,6 +118,7 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
                 type="button"
                 className="ciclo-vida__btn ciclo-vida__btn--amber"
                 onClick={() => abrirModal("detener")}
+                disabled={saving}
               >
                 Detener mantenimiento
               </button>
@@ -114,7 +126,7 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
               <button
                 type="button"
                 className="ciclo-vida__btn ciclo-vida__btn--amber"
-                disabled={estado === "baja"}
+                disabled={estado === "baja" || saving}
                 onClick={() => abrirModal("iniciar")}
               >
                 Iniciar mantenimiento
@@ -128,15 +140,13 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
               </span>
               <div>
                 <p className="ciclo-vida__row-title">Dar de baja</p>
-                <p className="ciclo-vida__row-desc">
-                  El activo deja de monitorearse, conserva su historial.
-                </p>
+                <p className="ciclo-vida__row-desc">Detiene el monitoreo, retira el clúster y conserva el historial.</p>
               </div>
             </div>
             <button
               type="button"
               className="ciclo-vida__btn ciclo-vida__btn--red"
-              disabled={estado === "baja"}
+              disabled={estado === "baja" || !onBaja || saving}
               onClick={() => abrirModal("baja")}
             >
               Dar de baja
@@ -172,7 +182,7 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
                 <span>Responsable</span>
                 <input
                   value={responsable}
-                  onChange={(e) => setResponsable(e.target.value)}
+                  onChange={(e) => { setResponsable(e.target.value); setMensajeValidacion(""); }}
                   placeholder="Nombre del responsable"
                 />
               </label>
@@ -180,10 +190,11 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
                 <span>{cfg.labelMotivo}</span>
                 <textarea
                   value={motivo}
-                  onChange={(e) => setMotivo(e.target.value)}
+                  onChange={(e) => { setMotivo(e.target.value); setMensajeValidacion(""); }}
                   placeholder={cfg.placeholder}
                 />
               </label>
+              {mensajeValidacion && <p className="ciclo-vida-modal__error" role="alert">{mensajeValidacion}</p>}
               <div className="ciclo-vida-modal__actions">
                 <button
                   type="button"
@@ -195,10 +206,10 @@ function CicloVidaActivo({ estado, mantenimiento, onIniciar, onDetener, onBaja }
                 <button
                   type="button"
                   className={`ciclo-vida-modal__confirm ciclo-vida-modal__confirm--${cfg.acento}`}
-                  disabled={!puedeConfirmar}
+                  disabled={saving}
                   onClick={confirmarModal}
                 >
-                  {cfg.texto}
+                  {saving ? "Guardando…" : cfg.texto}
                 </button>
               </div>
             </div>

@@ -1,0 +1,29 @@
+.server-detail__connection-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--status-critical) 48%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+.server-detail__connection-icon {
+  display: flex;
+  flex: 0 0 20px;
+  margin-top: 1px;
+}
+
+.server-detail__connection-notice strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.server-detail__connection-notice p {
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}

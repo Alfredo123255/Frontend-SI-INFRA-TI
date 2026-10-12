@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { datacenters } from "../data/datacenters";
+import { Link } from "react-router-dom";
 import { IconSun, IconMoon } from "./icons";
 import "./Topbar.css";
 
@@ -24,6 +24,10 @@ const pageMeta = {
     title: "Dashboard",
     subtitle: "Estado operativo consolidado de la plataforma",
   },
+  "/alertas": {
+    title: "Alertas",
+    subtitle: "Equipos apagados o sin conexión SNMP",
+  },
   "/administrar-equipos/snmp": {
     title: "Administrar equipos · Registrar por SNMP",
     subtitle: "Conecta un nuevo activo para monitoreo automático",
@@ -43,6 +47,10 @@ const detailMeta = {
 function getMeta(pathname) {
   if (pageMeta[pathname]) return pageMeta[pathname];
 
+  if (/^\/activos\/\d+\/historial$/.test(pathname)) {
+    return { title: "Historial de eventos", subtitle: "Cambios del activo y sus componentes" };
+  }
+
   const detailMatch = pathname.match(/^\/inventario\/(servidores|storage|switches)\/(.+)$/);
   if (detailMatch) {
     const [, categoria, id] = detailMatch;
@@ -61,18 +69,14 @@ function useClock() {
   return now;
 }
 
-function Topbar({ pathname, theme, onToggleTheme }) {
+function Topbar({ pathname, theme, onToggleTheme, alertas, alertasLoading, alertasError }) {
   const now = useClock();
   const meta = getMeta(pathname);
 
-  const hasOffline = datacenters.some((dc) => dc.status === "offline");
-  const hasWarning = datacenters.some((dc) => dc.status === "warning");
-  const overall = hasOffline ? "critical" : hasWarning ? "warning" : "good";
-  const overallLabel = hasOffline
-    ? "Incidencia activa"
-    : hasWarning
-    ? "Con advertencias"
-    : "Todos los sistemas operativos";
+  const overall = alertasError || alertasLoading ? "warning" : alertas.length ? "critical" : "good";
+  const overallLabel = alertasError ? "Alertas no disponibles"
+    : alertasLoading ? "Cargando alertas"
+    : alertas.length ? `${alertas.length} alerta${alertas.length === 1 ? "" : "s"}` : "Sin alertas";
 
   return (
     <header className="topbar">
@@ -82,10 +86,11 @@ function Topbar({ pathname, theme, onToggleTheme }) {
       </div>
 
       <div className="topbar__right">
-        <div className={`topbar__status topbar__status--${overall}`}>
+        <Link to="/alertas" className={`topbar__status topbar__status--${overall}`}
+          aria-label={`Ver alertas: ${overallLabel}`}>
           <span className="topbar__status-dot" />
           {overallLabel}
-        </div>
+        </Link>
         <div className="topbar__clock tabular">
           {now.toLocaleTimeString("es-PE", { hour12: false })}
         </div>

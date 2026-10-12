@@ -2,38 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { IconSearch, IconChevronDown, IconClose } from "../../components/icons";
 import CicloVidaActivo from "../../components/CicloVidaActivo";
 import { useEquipos } from "./useEquipos";
+import { cambiarMantenimiento, darDeBajaActivo, listarMantenimientos } from "../../api/client";
 import { loadFromStorage, saveToStorage } from "./storage";
 import "./AdministrarEquipos.css";
 
-const CICLO_VIDA_STORAGE_KEY = "administrar-equipos:ciclo-vida:v2";
 const SELECTED_EQUIPO_STORAGE_KEY = "administrar-equipos:equipo-seleccionado:v2";
 
-const isValidEstados = (v) => v && typeof v === "object" && !Array.isArray(v);
 const isValidSelectedKey = (v) => v === null || typeof v === "string";
-
-const SEED_CATEGORIAS_ORDEN = ["servidores", "switches", "storage", "chasis-blades", "servidores"];
-const SEED_MOTIVOS = [
-  "Actualización de firmware programada",
-  "Revisión preventiva de hardware",
-  "Migración de almacenamiento",
-  "Reemplazo de módulo de ventilación",
-  "Validación post-parche de seguridad",
-];
-const SEED_RESPONSABLES = ["Carlos Medina", "Lucía Fernández", "Miguel Torres", "Andrea Salas", "Jorge Paredes"];
-const SEED_DIAS_ATRAS = [5, 2, 1, 8, 3];
-
-function elegirEquiposSemilla(equipos) {
-  const usados = new Set();
-  const elegidos = [];
-  SEED_CATEGORIAS_ORDEN.forEach((categoria) => {
-    const candidato = equipos.find((eq) => eq.categoria === categoria && !usados.has(eq.key));
-    if (candidato) {
-      usados.add(candidato.key);
-      elegidos.push(candidato);
-    }
-  });
-  return elegidos;
-}
 
 function formatFecha(iso) {
   if (!iso) return "—";
@@ -115,44 +90,46 @@ function EquipoCombobox({ equipos, selectedKey, onSelect }) {
   );
 }
 
-function MantenimientoActivoTabla({ equipos, estadosPorEquipo, onDetener }) {
+function MantenimientoActivoTabla({ equipos, mantenimientos, onDetener, saving }) {
   const [query, setQuery] = useState("");
-  const [modalKey, setModalKey] = useState(null);
+  const [modalId, setModalId] = useState(null);
   const [responsable, setResponsable] = useState("");
   const [motivo, setMotivo] = useState("");
 
   const filas = useMemo(() => {
     const term = query.trim().toLowerCase();
-    return Object.entries(estadosPorEquipo)
-      .filter(([, v]) => v?.estado === "mantenimiento")
-      .map(([key, v]) => {
-        const eq = equipos.find((e) => e.key === key);
+    return mantenimientos
+      .map((item) => {
+        const eq = equipos.find((e) => e.id === item.activoId);
         return {
-          key,
-          hostname: eq?.hostname ?? key,
-          categoriaLabel: eq?.categoriaLabel ?? "—",
-          responsable: v.mantenimiento?.responsable ?? "—",
-          motivo: v.mantenimiento?.motivo ?? "—",
-          desde: v.mantenimiento?.desde ?? null,
+          activoId: item.activoId,
+          hostname: eq?.hostname ?? item.hostname ?? `Activo #${item.activoId}`,
+          categoriaLabel: eq?.categoriaLabel ?? item.tipoActivo ?? "—",
+          descripcion: item.descripcion ?? "Mantenimiento activo",
+          desde: item.desde,
         };
       })
       .filter((row) => term === "" || row.hostname.toLowerCase().includes(term))
       .sort((a, b) => (b.desde ?? "").localeCompare(a.desde ?? ""));
-  }, [estadosPorEquipo, equipos, query]);
+  }, [mantenimientos, equipos, query]);
 
-  const filaModal = filas.find((f) => f.key === modalKey) ?? null;
+  const filaModal = filas.find((f) => f.activoId === modalId) ?? null;
   const puedeConfirmar = responsable.trim() !== "" && motivo.trim() !== "";
 
-  const abrirModal = (key) => {
-    setModalKey(key);
+  const abrirModal = (activoId) => {
+    setModalId(activoId);
     setResponsable("");
     setMotivo("");
   };
-  const cerrarModal = () => setModalKey(null);
-  const confirmar = () => {
-    if (!puedeConfirmar || !modalKey) return;
-    onDetener(modalKey, responsable, motivo);
-    cerrarModal();
+  const cerrarModal = () => { if (!saving) setModalId(null); };
+  const confirmar = async () => {
+    if (!puedeConfirmar || !modalId || saving) return;
+    try {
+      await onDetener(modalId, responsable, motivo);
+      setModalId(null);
+    } catch {
+      // El error se muestra en la página; el formulario permanece abierto.
+    }
   };
 
   return (
@@ -185,7 +162,7 @@ function MantenimientoActivoTabla({ equipos, estadosPorEquipo, onDetener }) {
           </thead>
           <tbody>
             {filas.map((row) => (
-              <tr key={row.key}>
+              <tr key={row.activoId}>
                 <td>
                   <div className="admin-mant-tabla__equipo">
                     <span className="admin-mant-tabla__equipo-name">{row.hostname}</span>
@@ -195,15 +172,15 @@ function MantenimientoActivoTabla({ equipos, estadosPorEquipo, onDetener }) {
                 <td className="tabular">{formatFecha(row.desde)}</td>
                 <td>
                   <div className="admin-mant-tabla__desc">
-                    <span className="admin-mant-tabla__resp">{row.responsable}</span>
-                    <span>{row.motivo}</span>
+                    <span>{row.descripcion}</span>
                   </div>
                 </td>
                 <td>
                   <button
                     type="button"
                     className="ciclo-vida__btn ciclo-vida__btn--amber"
-                    onClick={() => abrirModal(row.key)}
+                    onClick={() => abrirModal(row.activoId)}
+                    disabled={saving}
                   >
                     Detener mantenimiento
                   </button>
@@ -221,7 +198,7 @@ function MantenimientoActivoTabla({ equipos, estadosPorEquipo, onDetener }) {
         </table>
       </div>
 
-      {modalKey && (
+      {modalId && (
         <div className="ciclo-vida-modal__overlay" onClick={cerrarModal}>
           <div
             className="ciclo-vida-modal"
@@ -260,10 +237,10 @@ function MantenimientoActivoTabla({ equipos, estadosPorEquipo, onDetener }) {
                 <button
                   type="button"
                   className="ciclo-vida-modal__confirm ciclo-vida-modal__confirm--accent"
-                  disabled={!puedeConfirmar}
+                  disabled={!puedeConfirmar || saving}
                   onClick={confirmar}
                 >
-                  Reactivar monitoreo
+                  {saving ? "Guardando…" : "Finalizar mantenimiento"}
                 </button>
               </div>
             </div>
@@ -275,55 +252,73 @@ function MantenimientoActivoTabla({ equipos, estadosPorEquipo, onDetener }) {
 }
 
 function BajasMantenimiento() {
-  const { equipos, loading, error } = useEquipos();
+  const { equipos, loading, error, refrescar } = useEquipos();
   const [selectedKey, setSelectedKey] = useState(() =>
     loadFromStorage(SELECTED_EQUIPO_STORAGE_KEY, null, isValidSelectedKey)
   );
-  const [estadosPorEquipo, setEstadosPorEquipo] = useState(() =>
-    loadFromStorage(CICLO_VIDA_STORAGE_KEY, {}, isValidEstados)
-  );
-  const seededRef = useRef(false);
+  const [mantenimientos, setMantenimientos] = useState([]);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    saveToStorage(CICLO_VIDA_STORAGE_KEY, estadosPorEquipo);
-  }, [estadosPorEquipo]);
+    let cancelled = false;
+    listarMantenimientos()
+      .then((lista) => { if (!cancelled) setMantenimientos(lista); })
+      .catch((err) => { if (!cancelled) setLoadError(err.message); })
+      .finally(() => { if (!cancelled) setMaintenanceLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     saveToStorage(SELECTED_EQUIPO_STORAGE_KEY, selectedKey);
   }, [selectedKey]);
 
-  // Simula unos cuantos equipos en mantenimiento (variados por categoría) mientras
-  // no haya ninguno real en ese estado, para que la tabla no se vea vacía.
-  useEffect(() => {
-    if (seededRef.current || loading || equipos.length === 0) return;
-    seededRef.current = true;
-    setEstadosPorEquipo((prev) => {
-      const yaHayMantenimiento = Object.values(prev).some((v) => v?.estado === "mantenimiento");
-      if (yaHayMantenimiento) return prev;
-      const elegidos = elegirEquiposSemilla(equipos);
-      const seeded = { ...prev };
-      elegidos.forEach((eq, i) => {
-        const dias = SEED_DIAS_ATRAS[i] ?? 1;
-        seeded[eq.key] = {
-          estado: "mantenimiento",
-          mantenimiento: {
-            responsable: SEED_RESPONSABLES[i] ?? "Equipo de Operaciones",
-            motivo: SEED_MOTIVOS[i] ?? "Mantenimiento programado",
-            desde: new Date(Date.now() - dias * 86400000).toISOString(),
-          },
-        };
+  const actualizarMantenimiento = async (activoId, activar, responsable, motivo) => {
+    if (saving) return;
+    setSaving(true);
+    setActionError("");
+    try {
+      await cambiarMantenimiento(activoId, {
+        mantenimientoActivo: activar,
+        responsable: responsable.trim(),
+        motivo: motivo.trim(),
       });
-      return seeded;
-    });
-  }, [loading, equipos]);
-
-  const actualizarEstado = (key, updates) => {
-    setEstadosPorEquipo((prev) => ({ ...prev, [key]: { ...prev[key], ...updates } }));
+      setMantenimientos(await listarMantenimientos());
+    } catch (err) {
+      setActionError(err.message);
+      throw err;
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const registro = selectedKey
-    ? estadosPorEquipo[selectedKey] ?? { estado: "operativo", mantenimiento: null }
+  const darDeBaja = async (activoId, responsable, motivo) => {
+    if (saving) return;
+    setSaving(true);
+    setActionError("");
+    try {
+      await darDeBajaActivo(activoId, {
+        responsable: responsable.trim(),
+        motivo: motivo.trim(),
+      });
+      setMantenimientos(await listarMantenimientos());
+      refrescar();
+    } catch (err) {
+      setActionError(err.message);
+      throw err;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const selected = equipos.find((eq) => eq.key === selectedKey);
+  const mantenimiento = selected
+    ? mantenimientos.find((item) => item.activoId === selected.id)
     : null;
+  const estado = selected?.estadoOperativo?.toLowerCase() === "baja"
+    ? "baja" : mantenimiento ? "mantenimiento" : "operativo";
 
   return (
     <div className="admin-equipos admin-equipos--wide">
@@ -338,28 +333,22 @@ function BajasMantenimiento() {
             No se pudo cargar el inventario ({error.message}).
           </div>
         )}
-        {loading && !error && <div className="admin-lifecycle__loading">Cargando equipos...</div>}
+        {loadError && <div className="admin-lifecycle__error" role="alert">No se pudo consultar el mantenimiento ({loadError}).</div>}
+        {actionError && <div className="admin-lifecycle__error" role="alert">No se pudo guardar el cambio ({actionError}).</div>}
+        {(loading || maintenanceLoading) && !error && <div className="admin-lifecycle__loading">Cargando equipos y mantenimiento...</div>}
 
-        {!loading && !error && (
+        {!loading && !maintenanceLoading && !error && !loadError && (
           <>
             <EquipoCombobox equipos={equipos} selectedKey={selectedKey} onSelect={setSelectedKey} />
 
-            {registro ? (
+            {selected ? (
               <CicloVidaActivo
-                estado={registro.estado}
-                mantenimiento={registro.mantenimiento}
-                onIniciar={(responsable, motivo) =>
-                  actualizarEstado(selectedKey, {
-                    estado: "mantenimiento",
-                    mantenimiento: { responsable, motivo, desde: new Date().toISOString() },
-                  })
-                }
-                onDetener={() =>
-                  actualizarEstado(selectedKey, { estado: "operativo", mantenimiento: null })
-                }
-                onBaja={() =>
-                  actualizarEstado(selectedKey, { estado: "baja", mantenimiento: null })
-                }
+                estado={estado}
+                mantenimiento={mantenimiento}
+                saving={saving}
+                onIniciar={(responsable, motivo) => actualizarMantenimiento(selected.id, true, responsable, motivo)}
+                onDetener={(responsable, motivo) => actualizarMantenimiento(selected.id, false, responsable, motivo)}
+                onBaja={(responsable, motivo) => darDeBaja(selected.id, responsable, motivo)}
               />
             ) : (
               <p className="admin-lifecycle__empty">Busca y selecciona un equipo para continuar.</p>
@@ -368,11 +357,12 @@ function BajasMantenimiento() {
         )}
       </section>
 
-      {!loading && !error && (
+      {!loading && !maintenanceLoading && !error && !loadError && (
         <MantenimientoActivoTabla
           equipos={equipos}
-          estadosPorEquipo={estadosPorEquipo}
-          onDetener={(key) => actualizarEstado(key, { estado: "operativo", mantenimiento: null })}
+          mantenimientos={mantenimientos}
+          saving={saving}
+          onDetener={(activoId, responsable, motivo) => actualizarMantenimiento(activoId, false, responsable, motivo)}
         />
       )}
     </div>

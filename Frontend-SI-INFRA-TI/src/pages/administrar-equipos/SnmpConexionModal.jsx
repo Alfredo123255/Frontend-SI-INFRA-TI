@@ -1,8 +1,9 @@
 import { IconClose } from "../../components/icons";
 import SnmpConexionForm from "./SnmpConexionForm";
+import EditarConexionSnmp from "./EditarConexionSnmp";
 import "./SnmpConexionModal.css";
 
-function SnmpConexionModal({ open, onClose }) {
+function SnmpConexionModal({ open, onClose, activoId, onSaved }) {
   if (!open) return null;
 
   return (
@@ -17,7 +18,11 @@ function SnmpConexionModal({ open, onClose }) {
           <IconClose />
         </button>
         <div className="snmp-modal__body">
-          <SnmpConexionForm onCancel={onClose} />
+          {activoId ? (
+            <EditarConexionSnmp activoId={activoId} onCancel={onClose} onSaved={onSaved} />
+          ) : (
+            <SnmpConexionForm onCancel={onClose} />
+          )}
         </div>
       </div>
     </div>

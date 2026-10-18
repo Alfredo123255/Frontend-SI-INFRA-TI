@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconWifi, IconEye, IconEyeOff, IconCheck } from "../../components/icons";
 import { actualizarConexionSnmp, obtenerConexionSnmp } from "../../api/client";
+import { esperarActualizacionSnmp, EVENTO_CONEXION_SNMP } from "../../api/actualizacionSnmp";
 import "./AdministrarEquipos.css";
 import "./EditarConexionSnmp.css";
 
@@ -11,6 +12,9 @@ function EditarConexionSnmp({ activoId, onCancel, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [confirmacion, setConfirmacion] = useState("");
+  const [actualizando, setActualizando] = useState(false);
+  const peticion = useRef(null);
   const [showClave, setShowClave] = useState(false);
   const duraciones = ["60", "120", "300", "1800", "86400"];
 
@@ -27,7 +31,7 @@ function EditarConexionSnmp({ activoId, onCancel, onSaved }) {
         setLoading(false);
       })
       .catch((err) => { if (active) { setError(err.message); setLoading(false); } });
-    return () => { active = false; };
+    return () => { active = false; peticion.current?.abort(); };
   }, [activoId]);
 
   const setField = (key) => (event) => {
@@ -68,6 +72,9 @@ function EditarConexionSnmp({ activoId, onCancel, onSaved }) {
     }
     setSaving(true);
     setError("");
+    const controlador = new AbortController();
+    peticion.current?.abort();
+    peticion.current = controlador;
     try {
       const data = await actualizarConexionSnmp(activoId, {
         ipGestion: form.ipGestion.trim(),
@@ -75,14 +82,29 @@ function EditarConexionSnmp({ activoId, onCancel, onSaved }) {
         frecuenciaActualizacion: Number(form.frecuenciaActualizacion),
         ...(form.clave ? { clave: form.clave } : {}),
       });
-      setConexion(data);
+      if (controlador.signal.aborted) return;
       setForm((current) => ({ ...current, clave: "", confirmarClave: "" }));
+      setActualizando(true);
+      const resultado = await esperarActualizacionSnmp(() => obtenerConexionSnmp(activoId), data,
+        { signal: controlador.signal });
+      if (controlador.signal.aborted) return;
+      setConexion(resultado.conexion);
+      setConfirmacion(resultado.actualizada
+        ? "Los cambios se guardaron y los datos del equipo ya están actualizados."
+        : resultado.conexion.estadoConexion === "Inactivo"
+          ? "Los cambios se guardaron. El equipo tiene el monitoreo inactivo."
+          : "Los cambios se guardaron. La lectura del equipo sigue pendiente; todavía se conservan sus últimos datos conocidos.");
       setSaved(true);
-      onSaved?.(data);
+      window.dispatchEvent(new CustomEvent(EVENTO_CONEXION_SNMP,
+        { detail: { activoId, estadoConexion: resultado.conexion.estadoConexion } }));
+      onSaved?.(resultado.conexion);
     } catch (err) {
-      setError(err.message);
+      if (!controlador.signal.aborted) setError(err.message);
     } finally {
-      setSaving(false);
+      if (!controlador.signal.aborted) {
+        setSaving(false);
+        setActualizando(false);
+      }
     }
   };
 
@@ -92,7 +114,7 @@ function EditarConexionSnmp({ activoId, onCancel, onSaved }) {
         <div className="snmp-edit__confirmation" role="status">
           <div className="snmp-edit__confirmation-icon"><IconCheck /></div>
           <h2>Conexión SNMP actualizada</h2>
-          <p>Los cambios se guardaron correctamente para este equipo.</p>
+          <p>{confirmacion}</p>
           <button type="button" className="admin-snmp__submit" onClick={onCancel}>
             Volver a la ficha
           </button>
@@ -153,10 +175,11 @@ function EditarConexionSnmp({ activoId, onCancel, onSaved }) {
           </div>
           <p className="snmp-edit__hint">Deja la nueva clave vacía para conservar la actual. Si cambias la IP, el usuario o la clave, se probará la conexión antes de guardar.</p>
           {error && <p className="admin-snmp__error" role="alert">{error}</p>}
+          {actualizando && <p className="snmp-edit__message" role="status">Conexión guardada. Actualizando los datos del equipo…</p>}
           <div className="admin-snmp__footer-actions snmp-edit__actions">
             <button type="button" className="admin-snmp__cancel" onClick={onCancel} disabled={saving}>Cerrar</button>
             <button type="submit" className="admin-snmp__submit" disabled={saving}>
-              {saving ? "Guardando…" : "Guardar cambios"}
+              {saving ? (actualizando ? "Actualizando datos…" : "Guardando…") : "Guardar cambios"}
             </button>
           </div>
         </form>

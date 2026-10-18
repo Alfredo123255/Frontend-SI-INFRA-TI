@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { IconChevronLeft } from "../../components/icons";
 import { listarHistorialActivo } from "../../api/client";
+import { fechaHoraLima } from "../../utils/fechas";
 import "./DetailPlaceholder.css";
 import "./HistorialActivo.css";
 
@@ -16,6 +17,7 @@ function esComponente(evento) {
 
 const CAMPOS = {
   estado: "Estado del componente",
+  presencia: "Presencia del componente",
   estado_operativo: "Estado operativo",
   estado_conexion: "Conexión SNMP",
   mantenimiento_activo: "Mantenimiento",
@@ -27,6 +29,9 @@ function tonoValor(evento) {
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   if (evento.campo === "mantenimiento_activo") {
     return valor === "true" ? "warning" : valor === "false" ? "good" : "neutral";
+  }
+  if (evento.campo === "presencia") {
+    return valor === "agregado" ? "good" : valor === "retirado" ? "orange" : "neutral";
   }
   if (valor === "baja") return "orange";
   if (["degradado", "advertencia", "warning"].includes(valor)) return "warning";
@@ -46,12 +51,7 @@ function mostrarValor(evento) {
 }
 
 function fecha(valor) {
-  if (!valor) return "—";
-  const date = new Date(valor);
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("es-PE", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  return fechaHoraLima(valor);
 }
 
 function HistorialActivo() {

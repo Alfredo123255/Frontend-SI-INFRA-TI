@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { IconAlert } from "../../components/icons";
 import { obtenerConexionSnmp } from "../../api/client";
+import { EVENTO_CONEXION_SNMP } from "../../api/actualizacionSnmp";
 import "./SnmpConnectionNotice.css";
 
 const TEXTOS = {
@@ -29,8 +30,18 @@ function SnmpConnectionNotice({ activoId, enMantenimiento = false }) {
         .catch((error) => { if (active) setEstado(error.status === 404 ? "No registrada" : null); });
     };
     consultar();
+    const recibirActualizacion = (event) => {
+      if (String(event.detail?.activoId) === String(activoId)) {
+        setEstado(event.detail.estadoConexion);
+      }
+    };
+    window.addEventListener(EVENTO_CONEXION_SNMP, recibirActualizacion);
     const timer = window.setInterval(consultar, 30_000);
-    return () => { active = false; window.clearInterval(timer); };
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener(EVENTO_CONEXION_SNMP, recibirActualizacion);
+    };
   }, [activoId]);
 
   const mensaje = TEXTOS[estado];

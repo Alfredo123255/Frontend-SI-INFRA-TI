@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { IconAlert } from "../components/icons";
+import { fechaHoraLima } from "../utils/fechas";
 import "./Alertas.css";
 
 function rutaActivo(alerta) {
@@ -14,11 +15,7 @@ function rutaActivo(alerta) {
 }
 
 function fecha(valor) {
-  if (!valor) return "Sin fecha";
-  const date = new Date(valor);
-  return Number.isNaN(date.getTime()) ? "Sin fecha" : date.toLocaleString("es-PE", {
-    dateStyle: "medium", timeStyle: "short",
-  });
+  return fechaHoraLima(valor, "Sin fecha");
 }
 
 function Alertas({ alertas, loading, error }) {

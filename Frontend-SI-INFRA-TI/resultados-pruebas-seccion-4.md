@@ -9,7 +9,7 @@ API: `http://localhost:8080`
 | Resultado | Cantidad |
 |---|---:|
 | Aprobado | 51 |
-| Fallido | 1 |
+| Fuera del alcance revisado | 1 |
 | No ejecutable por falta de datos de prueba | 0 |
 | Total | 52 |
 
@@ -25,7 +25,7 @@ Los casos se ejecutaron sobre los datos disponibles en el ambiente local. Los ca
 | CP-004 | Aprobado | Discos verificados en servidor `9` y storage `16`, incluyendo marca, modelo, velocidad, capacidad, tipo y estado. |
 | CP-005 | Aprobado | La ficha del servidor muestra versión y fecha de soporte del sistema operativo. |
 | CP-006 | Aprobado | Las tablas de ventiladores muestran velocidad, modelo y estado en servidor, switch, storage y chasis. |
-| CP-007 | Fallido | Las tarjetas y sus puertos se muestran, pero falta el tipo de conexión de la tarjeta de red. |
+| CP-007 | Fuera del alcance revisado | Se retira la exigencia de tipo de conexión de la NIC (F9). La ejecución del 07/09 queda conservada como evidencia histórica; la comprobación de los demás atributos requiere reevaluar el caso ajustado. |
 | CP-008 | Aprobado | Fuentes de poder verificadas en servidor, storage, switch y chasis con modelo, consumo, corriente y estado. |
 | CP-009 | Aprobado | La ficha de `srv-web01` muestra temperatura y consumo eléctrico. |
 | CP-010 | Aprobado | La ficha de `stg-san02` carga almacenamiento, CPU, RAM, protocolo, red, IOPS, caché de CPU, RAID, estado, ventiladores y fuentes. |
@@ -74,7 +74,7 @@ Los casos se ejecutaron sobre los datos disponibles en el ambiente local. Los ca
 
 ## Defectos encontrados
 
-1. Las tarjetas de red no muestran el tipo de conexión.
+1. Hallazgo CP-007 retirado del alcance el 17/10/2026: tipo de conexión de la NIC. No se convierte retroactivamente la ejecución de septiembre en una prueba aprobada.
 
 ## Datos de prueba faltantes
 

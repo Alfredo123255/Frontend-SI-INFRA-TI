@@ -1,6 +1,7 @@
 .sidebar {
   --sidebar-w: 264px;
   --sidebar-w-collapsed: 76px;
+  --sidebar-ease: cubic-bezier(0.2, 0, 0, 1);
   width: var(--sidebar-w);
   flex-shrink: 0;
   height: 100vh;
@@ -10,7 +11,7 @@
   flex-direction: column;
   background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-surface-2) 100%);
   border-right: 1px solid var(--border);
-  transition: width 0.22s ease;
+  transition: width 180ms var(--sidebar-ease);
   overflow: hidden;
   z-index: 20;
 }
@@ -102,7 +103,7 @@
 
 .sidebar__caret {
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform 160ms var(--sidebar-ease);
   color: var(--text-muted);
 }
 
@@ -114,7 +115,7 @@
   display: grid;
   grid-template-rows: 0fr;
   min-height: 0;
-  transition: grid-template-rows 0.22s ease;
+  transition: grid-template-rows 160ms var(--sidebar-ease);
 }
 
 .sidebar__submenu--open {
@@ -125,12 +126,12 @@
   overflow: hidden;
   min-height: 0;
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity 140ms ease-out;
 }
 
 .sidebar__submenu--open .sidebar__submenu-inner {
   opacity: 1;
-  transition: opacity 0.2s ease 0.05s;
+  transition: opacity 140ms ease-out;
 }
 
 .sidebar__subitem {
@@ -205,8 +206,8 @@
 }
 
 .sidebar--collapsed .sidebar__brand {
-  justify-content: center;
-  padding: 20px 12px;
+  justify-content: flex-end;
+  padding: 20px 22px;
 }
 
 .sidebar--collapsed .sidebar__brand-icon {
@@ -218,7 +219,8 @@
 }
 
 .sidebar--collapsed .sidebar__item {
-  justify-content: center;
+  /* Mantener el icono junto al borde al animar, sin saltar al centro del panel ancho. */
+  justify-content: flex-start;
 }
 
 .sidebar__flyout {
@@ -231,6 +233,15 @@
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
   z-index: 60;
   animation: sidebar-flyout-in 0.12s ease;
+}
+
+.sidebar__flyout::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -24px;
+  width: 24px;
 }
 
 @keyframes sidebar-flyout-in {
@@ -274,4 +285,17 @@
 .sidebar__flyout-item.is-active {
   color: var(--accent-strong);
   background: var(--accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar__caret,
+  .sidebar__submenu,
+  .sidebar__submenu-inner {
+    transition: none;
+  }
+
+  .sidebar__flyout {
+    animation: none;
+  }
 }

@@ -5,21 +5,11 @@ import { EVENTO_CONEXION_SNMP } from "../../api/actualizacionSnmp";
 import "./SnmpConnectionNotice.css";
 
 const TEXTOS = {
-  "Sin conexión": {
-    titulo: "Se perdió la conexión con el dispositivo",
-    detalle: "Datos desactualizados: se muestra la última lectura exitosa hasta que se restablezca la conexión SNMP.",
-  },
-  Inactivo: {
-    titulo: "Monitoreo SNMP inactivo",
-    detalle: "Este equipo no se está consultando. Los datos mostrados pueden estar desactualizados.",
-  },
-  "No registrada": {
-    titulo: "Sin conexión SNMP registrada",
-    detalle: "Este equipo no tiene una conexión vinculada. Los datos mostrados pueden estar desactualizados.",
-  },
+  titulo: "Se perdió la conexión con el dispositivo",
+  detalle: "Datos desactualizados: se muestra la última lectura exitosa hasta que se restablezca la conexión SNMP.",
 };
 
-function SnmpConnectionNotice({ activoId, enMantenimiento = false }) {
+function SnmpConnectionNotice({ activoId }) {
   const [estado, setEstado] = useState(null);
 
   useEffect(() => {
@@ -27,7 +17,7 @@ function SnmpConnectionNotice({ activoId, enMantenimiento = false }) {
     const consultar = () => {
       obtenerConexionSnmp(activoId)
         .then((conexion) => { if (active) setEstado(conexion.estadoConexion); })
-        .catch((error) => { if (active) setEstado(error.status === 404 ? "No registrada" : null); });
+        .catch(() => { if (active) setEstado(null); });
     };
     consultar();
     const recibirActualizacion = (event) => {
@@ -44,16 +34,14 @@ function SnmpConnectionNotice({ activoId, enMantenimiento = false }) {
     };
   }, [activoId]);
 
-  const mensaje = TEXTOS[estado];
-  if (enMantenimiento && estado === "Inactivo") return null;
-  if (!mensaje) return null;
+  if (estado !== "Sin conexión") return null;
 
   return (
     <div className="server-detail__connection-notice" role="alert">
       <span className="server-detail__connection-icon" aria-hidden="true"><IconAlert /></span>
       <div>
-        <strong>{mensaje.titulo}</strong>
-        <p>{mensaje.detalle}</p>
+        <strong>{TEXTOS.titulo}</strong>
+        <p>{TEXTOS.detalle}</p>
       </div>
     </div>
   );

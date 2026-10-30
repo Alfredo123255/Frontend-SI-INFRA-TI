@@ -138,3 +138,23 @@ export function actualizarAdministrativosActivo(activoId, datos) {
     body: JSON.stringify(datos),
   });
 }
+
+export function actualizarCluster(nombre, datos) {
+  return apiJson(`/api/clusters/${encodeURIComponent(nombre)}`, { method: "PUT", body: JSON.stringify(datos) });
+}
+
+export function eliminarCluster(nombre) {
+  return apiJson(`/api/clusters/${encodeURIComponent(nombre)}`, { method: "DELETE" });
+}
+
+export function crearDatacenter(datos) {
+  return apiJson("/api/datacenters", { method: "POST", body: JSON.stringify(datos) });
+}
+
+export function actualizarDatacenter(nombre, datos) {
+  return apiJson(`/api/datacenters/${encodeURIComponent(nombre)}`, { method: "PUT", body: JSON.stringify(datos) });
+}
+
+export function eliminarDatacenter(nombre) {
+  return apiJson(`/api/datacenters/${encodeURIComponent(nombre)}`, { method: "DELETE" });
+}

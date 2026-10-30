@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { IconAlert } from "../components/icons";
 import { fechaHoraLima } from "../utils/fechas";
+import { nombreCampoEvento } from "../utils/camposEvento";
 import "./Alertas.css";
 
 function rutaActivo(alerta) {
@@ -25,11 +25,7 @@ function Alertas({ alertas, loading, error }) {
   return (
     <div className="alertas">
       <div className="alertas__heading">
-        <div>
-          <span className="alertas__eyebrow"><IconAlert /> Monitoreo de activos</span>
-          <h1>Alertas de equipos</h1>
-          <p>Equipos apagados o cuya conexión SNMP está caída. Cada fila muestra el último evento registrado en su historial.</p>
-        </div>
+        <p>Consulta el último evento de los equipos apagados o sin conexión SNMP.</p>
         <span className="alertas__count">{loading ? "Consultando…" : `${alertas.length} equipo${alertas.length === 1 ? "" : "s"}`}</span>
       </div>
 
@@ -67,7 +63,7 @@ function Alertas({ alertas, loading, error }) {
                     </div></td>
                     <td className="alertas__event">
                       <strong>{alerta.descripcion || "Sin eventos registrados"}</strong>
-                      {alerta.campo && <span>{alerta.componenteTipo ? `${alerta.componenteTipo}${alerta.componenteSn ? ` · ${alerta.componenteSn}` : ""} · ` : ""}{alerta.campo}{alerta.valorNuevo ? ` → ${alerta.valorNuevo}` : ""}</span>}
+                      {alerta.campo && <span>{alerta.componenteTipo ? `${alerta.componenteTipo}${alerta.componenteSn ? ` · ${alerta.componenteSn}` : ""} · ` : ""}{nombreCampoEvento(alerta.campo)}{alerta.valorNuevo ? ` → ${alerta.valorNuevo}` : ""}</span>}
                     </td>
                     <td className="alertas__date">{fecha(alerta.fechaCambio)}</td>
                     <td><Link className="alertas__history" to={`/activos/${alerta.activoId}/historial?volver=${encodeURIComponent(rutaActivo(alerta))}`}>Ver historial</Link></td>

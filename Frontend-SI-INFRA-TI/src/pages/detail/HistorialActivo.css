@@ -13,16 +13,17 @@
   gap: 16px;
 }
 
-.historial-activo__head h1 {
-  margin: 0;
+.historial-activo__head strong {
   color: var(--text-primary);
-  font-size: 22px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .historial-activo__head p {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .historial-activo__total {
@@ -108,7 +109,6 @@
 .historial-activo__origin.is-component { background: var(--bg-surface-2); color: var(--text-secondary); }
 .historial-activo__component { display: block; margin-top: 7px; color: var(--text-primary); font-weight: 600; }
 .historial-activo__field { display: block; color: var(--text-primary); font-weight: 600; }
-.historial-activo__field-code { display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px; }
 .historial-activo__description { min-width: 220px; line-height: 1.5; }
 .historial-activo__date { white-space: nowrap; font-variant-numeric: tabular-nums; }
 

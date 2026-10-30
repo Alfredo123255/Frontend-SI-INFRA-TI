@@ -4,6 +4,10 @@ import { IconSun, IconMoon } from "./icons";
 import "./Topbar.css";
 
 const pageMeta = {
+  "/configurar-alertas": {
+    title: "Insights · Configurar alertas",
+    subtitle: "Umbrales que generan alertas medias y críticas",
+  },
   "/": {
     title: "Inicio",
     subtitle: "Mapa nacional de infraestructura on-premise",
@@ -21,7 +25,7 @@ const pageMeta = {
     subtitle: "Red de datos y equipos de conmutación",
   },
   "/dashboard": {
-    title: "Dashboard",
+    title: "Insights · Dashboard",
     subtitle: "Estado operativo consolidado de la plataforma",
   },
   "/alertas": {
@@ -36,6 +40,14 @@ const pageMeta = {
     title: "Administrar equipos · Bajas y mantenimiento",
     subtitle: "Gestiona el ciclo de vida de los activos del inventario",
   },
+  "/administrar-entornos/datacenters": {
+    title: "Administrar entornos · Datacenters",
+    subtitle: "Sedes físicas donde se ubican los equipos",
+  },
+  "/administrar-entornos/clusters": {
+    title: "Administrar entornos · Clusters",
+    subtitle: "Agrupaciones lógicas de equipos por datacenter y ambiente",
+  },
 };
 
 const detailMeta = {
@@ -49,6 +61,10 @@ function getMeta(pathname) {
 
   if (/^\/activos\/\d+\/historial$/.test(pathname)) {
     return { title: "Historial de eventos", subtitle: "Cambios del activo y sus componentes" };
+  }
+
+  if (/^\/activos\/\d+\/metricas$/.test(pathname)) {
+    return { title: "Métricas del equipo", subtitle: "Valor actual y evolución en el tiempo" };
   }
 
   const detailMatch = pathname.match(/^\/inventario\/(servidores|storage|switches)\/(.+)$/);

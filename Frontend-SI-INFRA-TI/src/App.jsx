@@ -14,12 +14,15 @@ import SwitchDetail from "./pages/detail/SwitchDetail";
 import ChasisBladeDetail from "./pages/detail/ChasisBladeDetail";
 import HistorialActivo from "./pages/detail/HistorialActivo";
 import Alertas from "./pages/Alertas";
+import ConfigurarAlertas from "./pages/configurar-alertas/ConfigurarAlertas";
+import MetricasActivo from "./pages/metricas/MetricasActivo";
+import AdministrarClusters from "./pages/administrar-entornos/AdministrarClusters";
+import AdministrarDatacenters from "./pages/administrar-entornos/AdministrarDatacenters";
 import { listarAlertas } from "./api/client";
 import { useTheme } from "./hooks/useTheme";
 import "./App.css";
 
 function App() {
-  const [collapsed, setCollapsed] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [alertas, setAlertas] = useState([]);
@@ -45,7 +48,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+      <Sidebar />
       <div className="app-main">
         <Topbar pathname={location.pathname} theme={theme} onToggleTheme={toggleTheme}
           alertas={alertas} alertasLoading={alertasLoading} alertasError={alertasError} />
@@ -53,6 +56,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/configurar-alertas" element={<ConfigurarAlertas />} />
+            <Route path="/activos/:id/metricas" element={<MetricasActivo />} />
             <Route path="/alertas" element={<Alertas alertas={alertas} loading={alertasLoading} error={alertasError} />} />
             <Route path="/inventario" element={<Navigate to="/inventario/servidores" replace />} />
             <Route
@@ -66,6 +71,8 @@ function App() {
             <Route path="/inventario/storage/:id" element={<StorageDetail />} />
             <Route path="/inventario/switches/:id" element={<SwitchDetail />} />
             <Route path="/inventario/chasis-blades/:id" element={<ChasisBladeDetail />} />
+            <Route path="/administrar-entornos/datacenters" element={<AdministrarDatacenters />} />
+            <Route path="/administrar-entornos/clusters" element={<AdministrarClusters />} />
             <Route path="/activos/:id/historial" element={<HistorialActivo />} />
             <Route path="/inventario/:categoria" element={<Inventory />} />
             <Route path="*" element={<Navigate to="/" replace />} />

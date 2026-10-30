@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { IconChevronLeft } from "../../components/icons";
 import { listarHistorialActivo } from "../../api/client";
 import { fechaHoraLima } from "../../utils/fechas";
+import { nombreCampoEvento } from "../../utils/camposEvento";
 import "./DetailPlaceholder.css";
 import "./HistorialActivo.css";
 
@@ -14,15 +15,6 @@ function componente(evento) {
 function esComponente(evento) {
   return Boolean(evento.componenteTipo || evento.componenteSn);
 }
-
-const CAMPOS = {
-  estado: "Estado del componente",
-  presencia: "Presencia del componente",
-  estado_operativo: "Estado operativo",
-  estado_conexion: "Conexión SNMP",
-  mantenimiento_activo: "Mantenimiento",
-  cluster: "Clúster",
-};
 
 function tonoValor(evento) {
   const valor = String(evento.valorNuevo ?? "").trim().toLowerCase()
@@ -88,10 +80,10 @@ function HistorialActivo() {
       </Link>
       <div className="historial-activo__head">
         <div>
-          <h1>Historial de eventos</h1>
-          <p>Activo #{id} · Cambios del equipo y sus componentes</p>
+          <strong>Activo #{id}</strong>
+          <p>Registro cronológico de cambios</p>
         </div>
-        {!loading && !error && <span className="historial-activo__total">{eventos.length} evento(s)</span>}
+        {!loading && !error && <span className="historial-activo__total">{eventos.length} {eventos.length === 1 ? "evento" : "eventos"}</span>}
       </div>
 
       {loading && <p className="historial-activo__message">Cargando historial...</p>}
@@ -145,8 +137,7 @@ function HistorialActivo() {
                     {esComponente(evento) && <span className="historial-activo__component">{componente(evento)}</span>}
                   </td>
                   <td>
-                    <span className="historial-activo__field">{CAMPOS[evento.campo] ?? evento.campo ?? "—"}</span>
-                    {CAMPOS[evento.campo] && <span className="historial-activo__field-code">{evento.campo}</span>}
+                    <span className="historial-activo__field">{nombreCampoEvento(evento.campo)}</span>
                   </td>
                   <td className="historial-activo__description">{evento.descripcion || "—"}</td>
                   <td><span className={`historial-activo__value historial-activo__value--${tonoValor(evento)}`}

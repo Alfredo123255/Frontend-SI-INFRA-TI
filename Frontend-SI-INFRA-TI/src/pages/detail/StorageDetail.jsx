@@ -287,7 +287,7 @@ function StorageDetail() {
       </Link>
       <h1 className="server-detail__title">Storage {data?.hostname ?? id}</h1>
       <MaintenanceNotice active={data?.mantenimientoActivo === true} />
-      {data && <SnmpConnectionNotice activoId={id} enMantenimiento={data.mantenimientoActivo === true} />}
+      {data && <SnmpConnectionNotice activoId={id} />}
 
       {error && <p className="detail-placeholder__error">No se pudo cargar el storage ({error.message}).</p>}
       {loading && !error && <p>Cargando...</p>}

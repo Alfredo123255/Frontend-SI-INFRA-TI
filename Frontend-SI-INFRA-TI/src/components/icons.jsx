@@ -196,3 +196,19 @@ export const IconPower = (props) => (
     <path d="M7.4 6.2a7 7 0 1 0 9.2 0" />
   </svg>
 );
+
+export const IconPencil = (props) => (
+  <svg {...base} {...props}>
+    <path d="M15.2 5.2l3.6 3.6" />
+    <path d="M4 20l1-4.2L15.9 4.9a1.8 1.8 0 0 1 2.6 0l.6.6a1.8 1.8 0 0 1 0 2.6L8.2 19 4 20z" />
+  </svg>
+);
+
+export const IconTrash = (props) => (
+  <svg {...base} {...props}>
+    <path d="M4 7h16" />
+    <path d="M9.5 7V4.8h5V7" />
+    <path d="M6.5 7l.9 12.2a1 1 0 0 0 1 .8h7.2a1 1 0 0 0 1-.8L17.5 7" />
+    <path d="M10.2 10.8v5.4M13.8 10.8v5.4" />
+  </svg>
+);

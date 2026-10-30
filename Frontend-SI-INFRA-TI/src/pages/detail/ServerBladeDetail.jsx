@@ -8,6 +8,7 @@ import DetailTable from "./DetailTable";
 import MaintenanceNotice from "./MaintenanceNotice";
 import SnmpConnectionNotice from "./SnmpConnectionNotice";
 import HistorialActivoLink from "./HistorialActivoLink";
+import MetricasActivoLink from "./MetricasActivoLink";
 import DatosGeneralesEditables from "./DatosGeneralesEditables";
 import { obtenerServidor } from "../../api/client";
 import "./DetailPlaceholder.css";
@@ -202,7 +203,7 @@ function ServerBladeDetail() {
       </Link>
       <h1 className="server-detail__title">Servidor Blade {data?.hostname ?? id}</h1>
       <MaintenanceNotice active={data?.mantenimientoActivo === true} />
-      {data && <SnmpConnectionNotice activoId={id} enMantenimiento={data.mantenimientoActivo === true} />}
+      {data && <SnmpConnectionNotice activoId={id} />}
 
       {error && <p className="detail-placeholder__error">No se pudo cargar el servidor ({error.message}).</p>}
       {loading && !error && <p>Cargando...</p>}
@@ -225,7 +226,10 @@ function ServerBladeDetail() {
                     </button>
                     <div className="server-detail__section-header-actions">
                       {section.key === "general" && (
-                        <HistorialActivoLink activoId={id} />
+                        <>
+                          <MetricasActivoLink activoId={id} />
+                          <HistorialActivoLink activoId={id} />
+                        </>
                       )}
                       {section.key === "general" && (
                         <button

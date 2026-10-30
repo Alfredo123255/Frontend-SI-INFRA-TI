@@ -235,7 +235,7 @@ function ChasisBladeDetail() {
       </Link>
       <h1 className="server-detail__title">Chasis Blade {data?.hostname ?? id}</h1>
       <MaintenanceNotice active={data?.mantenimientoActivo === true} />
-      {data && <SnmpConnectionNotice activoId={id} enMantenimiento={data.mantenimientoActivo === true} />}
+      {data && <SnmpConnectionNotice activoId={id} />}
 
       {error && <p className="detail-placeholder__error">No se pudo cargar el chasis ({error.message}).</p>}
       {loading && !error && <p>Cargando...</p>}

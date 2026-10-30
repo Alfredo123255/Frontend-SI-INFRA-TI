@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -14,6 +14,9 @@ import {
   IconSettings,
   IconWifi,
   IconWrench,
+  IconMapPin,
+  IconTarget,
+  IconAlert,
 } from "./icons";
 import "./Sidebar.css";
 
@@ -29,11 +32,29 @@ const adminEquiposLinks = [
   { to: "/administrar-equipos/ciclo-vida", label: "Bajas y mantenimiento", icon: IconWrench },
 ];
 
+const adminEntornosLinks = [
+  { to: "/administrar-entornos/datacenters", label: "Datacenters", icon: IconMapPin },
+  { to: "/administrar-entornos/clusters", label: "Clusters", icon: IconTarget },
+];
+
+const insightsLinks = [
+  { to: "/dashboard", label: "Dashboard", icon: IconDashboard },
+  { to: "/configurar-alertas", label: "Configurar alertas", icon: IconAlert },
+];
+
 function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSidebar }) {
   const [open, setOpen] = useState(active);
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutPos, setFlyoutPos] = useState({ top: 0, left: 0 });
   const groupRef = useRef(null);
+  const flyoutRef = useRef(null);
+  const closeTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+  useEffect(() => {
+    clearTimeout(closeTimer.current);
+    setFlyoutOpen(false);
+  }, [collapsed]);
 
   const handleClick = () => {
     if (collapsed) {
@@ -45,13 +66,30 @@ function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSid
   };
 
   const openFlyout = () => {
+    clearTimeout(closeTimer.current);
     if (!collapsed || !groupRef.current) return;
     const rect = groupRef.current.getBoundingClientRect();
-    setFlyoutPos({ top: rect.top, left: rect.right + 4 });
+    setFlyoutPos((actual) => actual.top === rect.top && actual.left === rect.right + 4
+      ? actual : { top: rect.top, left: rect.right + 4 });
     setFlyoutOpen(true);
   };
 
-  const closeFlyout = () => setFlyoutOpen(false);
+  const closeFlyout = (e) => {
+    const destino = e?.relatedTarget;
+    if (
+      destino instanceof Node &&
+      (groupRef.current?.contains(destino) || flyoutRef.current?.contains(destino))
+    ) {
+      return;
+    }
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setFlyoutOpen(false), 120);
+  };
+
+  const closeFlyoutNow = () => {
+    clearTimeout(closeTimer.current);
+    setFlyoutOpen(false);
+  };
 
   return (
     <div
@@ -64,7 +102,7 @@ function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSid
         type="button"
         className={`sidebar__item sidebar__item--button ${active ? "is-active" : ""}`}
         onClick={handleClick}
-        title={label}
+        aria-label={label}
         aria-expanded={open && !collapsed}
       >
         <Icon className="sidebar__item-icon" />
@@ -98,8 +136,9 @@ function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSid
         createPortal(
           <div
             className="sidebar__flyout"
+            ref={flyoutRef}
             style={{ top: flyoutPos.top, left: flyoutPos.left }}
-            onMouseEnter={openFlyout}
+            onMouseEnter={() => clearTimeout(closeTimer.current)}
             onMouseLeave={closeFlyout}
           >
             <div className="sidebar__flyout-title">{label}</div>
@@ -108,7 +147,7 @@ function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSid
                 key={to}
                 to={to}
                 className={({ isActive }) => `sidebar__flyout-item ${isActive ? "is-active" : ""}`}
-                onClick={closeFlyout}
+                onClick={closeFlyoutNow}
               >
                 <SubIcon className="sidebar__subitem-icon" />
                 <span>{subLabel}</span>
@@ -121,10 +160,15 @@ function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSid
   );
 }
 
-function Sidebar({ collapsed, onToggle }) {
+function Sidebar() {
+  // El plegado es local: no vuelve a renderizar tablas, fichas o gráficas de la página.
+  const [collapsed, setCollapsed] = useState(false);
+  const onToggle = useCallback(() => setCollapsed((actual) => !actual), []);
   const location = useLocation();
   const isInventoryRoute = location.pathname.startsWith("/inventario");
   const isAdminRoute = location.pathname.startsWith("/administrar-equipos");
+  const isEntornosRoute = location.pathname.startsWith("/administrar-entornos");
+  const isInsightsRoute = location.pathname === "/dashboard" || location.pathname === "/configurar-alertas";
 
   return (
     <aside className={`sidebar ${collapsed ? "sidebar--collapsed" : ""}`}>
@@ -178,17 +222,26 @@ function Sidebar({ collapsed, onToggle }) {
           onExpandSidebar={onToggle}
         />
 
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) => `sidebar__item ${isActive ? "is-active" : ""}`}
-          title="Dashboard"
-        >
-          <IconDashboard className="sidebar__item-icon" />
-          {!collapsed && <span>Dashboard</span>}
-        </NavLink>
+        <SidebarGroup
+          icon={IconMapPin}
+          label="Administrar entornos"
+          links={adminEntornosLinks}
+          active={isEntornosRoute}
+          collapsed={collapsed}
+          onExpandSidebar={onToggle}
+        />
+
+        <SidebarGroup
+          icon={IconDashboard}
+          label="Insights"
+          links={insightsLinks}
+          active={isInsightsRoute}
+          collapsed={collapsed}
+          onExpandSidebar={onToggle}
+        />
       </nav>
     </aside>
   );
 }
 
-export default Sidebar;
+export default memo(Sidebar);

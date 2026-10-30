@@ -1,0 +1,451 @@
+diff --git a/Frontend-SI-INFRA-TI/src/App.jsx b/Frontend-SI-INFRA-TI/src/App.jsx
+index 6bf6759..5ff585c 100644
+--- a/Frontend-SI-INFRA-TI/src/App.jsx
++++ b/Frontend-SI-INFRA-TI/src/App.jsx
+@@ -14,6 +14,8 @@ import SwitchDetail from "./pages/detail/SwitchDetail";
+ import ChasisBladeDetail from "./pages/detail/ChasisBladeDetail";
+ import HistorialActivo from "./pages/detail/HistorialActivo";
+ import Alertas from "./pages/Alertas";
++import AdministrarClusters from "./pages/administrar-entornos/AdministrarClusters";
++import AdministrarDatacenters from "./pages/administrar-entornos/AdministrarDatacenters";
+ import { listarAlertas } from "./api/client";
+ import { useTheme } from "./hooks/useTheme";
+ import "./App.css";
+@@ -66,6 +68,8 @@ function App() {
+             <Route path="/inventario/storage/:id" element={<StorageDetail />} />
+             <Route path="/inventario/switches/:id" element={<SwitchDetail />} />
+             <Route path="/inventario/chasis-blades/:id" element={<ChasisBladeDetail />} />
++            <Route path="/administrar-entornos/datacenters" element={<AdministrarDatacenters />} />
++            <Route path="/administrar-entornos/clusters" element={<AdministrarClusters />} />
+             <Route path="/activos/:id/historial" element={<HistorialActivo />} />
+             <Route path="/inventario/:categoria" element={<Inventory />} />
+             <Route path="*" element={<Navigate to="/" replace />} />
+diff --git a/Frontend-SI-INFRA-TI/src/components/Sidebar.jsx b/Frontend-SI-INFRA-TI/src/components/Sidebar.jsx
+index 2c751b3..ff3761c 100644
+--- a/Frontend-SI-INFRA-TI/src/components/Sidebar.jsx
++++ b/Frontend-SI-INFRA-TI/src/components/Sidebar.jsx
+@@ -14,6 +14,8 @@ import {
+   IconSettings,
+   IconWifi,
+   IconWrench,
++  IconMapPin,
++  IconTarget,
+ } from "./icons";
+ import "./Sidebar.css";
+ 
+@@ -29,6 +31,11 @@ const adminEquiposLinks = [
+   { to: "/administrar-equipos/ciclo-vida", label: "Bajas y mantenimiento", icon: IconWrench },
+ ];
+ 
++const adminEntornosLinks = [
++  { to: "/administrar-entornos/datacenters", label: "Datacenters", icon: IconMapPin },
++  { to: "/administrar-entornos/clusters", label: "Clusters", icon: IconTarget },
++];
++
+ function SidebarGroup({ icon: Icon, label, links, active, collapsed, onExpandSidebar }) {
+   const [open, setOpen] = useState(active);
+   const [flyoutOpen, setFlyoutOpen] = useState(false);
+@@ -125,6 +132,7 @@ function Sidebar({ collapsed, onToggle }) {
+   const location = useLocation();
+   const isInventoryRoute = location.pathname.startsWith("/inventario");
+   const isAdminRoute = location.pathname.startsWith("/administrar-equipos");
++  const isEntornosRoute = location.pathname.startsWith("/administrar-entornos");
+ 
+   return (
+     <aside className={`sidebar ${collapsed ? "sidebar--collapsed" : ""}`}>
+@@ -178,6 +186,15 @@ function Sidebar({ collapsed, onToggle }) {
+           onExpandSidebar={onToggle}
+         />
+ 
++        <SidebarGroup
++          icon={IconMapPin}
++          label="Administrar entornos"
++          links={adminEntornosLinks}
++          active={isEntornosRoute}
++          collapsed={collapsed}
++          onExpandSidebar={onToggle}
++        />
++
+         <NavLink
+           to="/dashboard"
+           className={({ isActive }) => `sidebar__item ${isActive ? "is-active" : ""}`}
+diff --git a/Frontend-SI-INFRA-TI/src/components/Topbar.jsx b/Frontend-SI-INFRA-TI/src/components/Topbar.jsx
+index 02f3b7f..8d75638 100644
+--- a/Frontend-SI-INFRA-TI/src/components/Topbar.jsx
++++ b/Frontend-SI-INFRA-TI/src/components/Topbar.jsx
+@@ -36,6 +36,14 @@ const pageMeta = {
+     title: "Administrar equipos · Bajas y mantenimiento",
+     subtitle: "Gestiona el ciclo de vida de los activos del inventario",
+   },
++  "/administrar-entornos/datacenters": {
++    title: "Administrar entornos · Datacenters",
++    subtitle: "Sedes físicas donde se ubican los equipos",
++  },
++  "/administrar-entornos/clusters": {
++    title: "Administrar entornos · Clusters",
++    subtitle: "Agrupaciones lógicas de equipos por datacenter y ambiente",
++  },
+ };
+ 
+ const detailMeta = {
+diff --git a/Frontend-SI-INFRA-TI/src/components/icons.jsx b/Frontend-SI-INFRA-TI/src/components/icons.jsx
+index e8fb1fa..5093d5c 100644
+--- a/Frontend-SI-INFRA-TI/src/components/icons.jsx
++++ b/Frontend-SI-INFRA-TI/src/components/icons.jsx
+@@ -196,3 +196,19 @@ export const IconPower = (props) => (
+     <path d="M7.4 6.2a7 7 0 1 0 9.2 0" />
+   </svg>
+ );
++
++export const IconPencil = (props) => (
++  <svg {...base} {...props}>
++    <path d="M15.2 5.2l3.6 3.6" />
++    <path d="M4 20l1-4.2L15.9 4.9a1.8 1.8 0 0 1 2.6 0l.6.6a1.8 1.8 0 0 1 0 2.6L8.2 19 4 20z" />
++  </svg>
++);
++
++export const IconTrash = (props) => (
++  <svg {...base} {...props}>
++    <path d="M4 7h16" />
++    <path d="M9.5 7V4.8h5V7" />
++    <path d="M6.5 7l.9 12.2a1 1 0 0 0 1 .8h7.2a1 1 0 0 0 1-.8L17.5 7" />
++    <path d="M10.2 10.8v5.4M13.8 10.8v5.4" />
++  </svg>
++);
+diff --git a/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarClusters.jsx b/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarClusters.jsx
+new file mode 100644
+index 0000000..ea6e35c
+--- /dev/null
++++ b/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarClusters.jsx
+@@ -0,0 +1,146 @@
++import { useMemo, useState } from "react";
++import { IconSearch, IconPlus, IconClose, IconPencil, IconTrash } from "../../components/icons";
++import "../administrar-equipos/AdministrarEquipos.css";
++import "../../components/CicloVidaActivo.css";
++import "./AdministrarEntornos.css";
++
++// Datos de ejemplo: reemplazar por la respuesta de GET /api/clusters y GET /api/datacenters.
++const DATACENTERS = ["Data Center Lima Central", "Data Center Callao DR", "Data Center Trujillo Norte", "Data Center Arequipa Sur", "Data Center Piura"];
++const CLUSTERS = [
++  { nombre: "DB Cluster Producción", ambiente: "PRODUCCION", datacenter: "Data Center Lima Central", activos: 14 },
++  { nombre: "ERP Core", ambiente: "PRODUCCION", datacenter: "Data Center Lima Central", activos: 8 },
++  { nombre: "Web Frontend", ambiente: "PRODUCCION", datacenter: "Data Center Lima Central", activos: 11 },
++  { nombre: "Backup & DR", ambiente: "PRODUCCION", datacenter: "Data Center Callao DR", activos: 6 },
++  { nombre: "Virtualización Hyper-V", ambiente: "QA", datacenter: "Data Center Trujillo Norte", activos: 5 },
++  { nombre: "Virtualización VMware", ambiente: "DESARROLLO", datacenter: "Data Center Arequipa Sur", activos: 7 },
++  { nombre: "Laboratorio Pruebas", ambiente: "DESARROLLO", datacenter: "Data Center Lima Central", activos: 0 },
++];
++const AMBIENTES = {
++  PRODUCCION: { label: "Producción", className: "entornos-tag--prod" },
++  QA: { label: "QA", className: "entornos-tag--qa" },
++  DESARROLLO: { label: "Desarrollo", className: "entornos-tag--dev" },
++};
++const VACIO = { nombre: "", ambiente: "", datacenter: "" };
++
++function AdministrarClusters() {
++  const [query, setQuery] = useState("");
++  const [form, setForm] = useState(null); // { modo: "nuevo" | "editar", datos }
++  const [borrar, setBorrar] = useState(null);
++
++  const filas = useMemo(
++    () => CLUSTERS.filter((c) => c.nombre.toLowerCase().includes(query.trim().toLowerCase())),
++    [query]
++  );
++  const totalDatacenters = new Set(CLUSTERS.map((c) => c.datacenter)).size;
++  const puedeGuardar = form && form.datos.nombre.trim() && form.datos.ambiente && form.datos.datacenter;
++  const set = (campo) => (e) => setForm((f) => ({ ...f, datos: { ...f.datos, [campo]: e.target.value } }));
++  const bloqueado = borrar && borrar.activos > 0;
++
++  return (
++    <div className="admin-equipos admin-equipos--wide">
++      <section className="panel admin-mant-tabla">
++        <div className="admin-mant-tabla__head">
++          <div>
++            <h3>Clusters registrados</h3>
++            <p>{filas.length} cluster(s) en {totalDatacenters} datacenters.</p>
++          </div>
++          <div className="entornos-head-actions">
++            <div className="equipo-combobox__input-wrap admin-mant-tabla__search">
++              <IconSearch className="equipo-combobox__search-icon" />
++              <input className="equipo-combobox__input" placeholder="Buscar cluster..." value={query} onChange={(e) => setQuery(e.target.value)} />
++            </div>
++            <button type="button" className="entornos-btn" onClick={() => setForm({ modo: "nuevo", datos: VACIO })}>
++              <IconPlus /> Nuevo cluster
++            </button>
++          </div>
++        </div>
++        <div className="admin-mant-tabla__wrap">
++          <table className="admin-mant-tabla__table">
++            <thead><tr><th>Nombre</th><th>Ambiente</th><th>Datacenter</th><th>Equipos</th><th></th></tr></thead>
++            <tbody>
++              {filas.map((c) => (
++                <tr key={c.nombre}>
++                  <td><span className="admin-mant-tabla__equipo-name">{c.nombre}</span></td>
++                  <td><span className={`entornos-tag ${AMBIENTES[c.ambiente].className}`}>{AMBIENTES[c.ambiente].label}</span></td>
++                  <td>{c.datacenter}</td>
++                  <td className="tabular">{c.activos}</td>
++                  <td>
++                    <div className="entornos-acciones">
++                      <button type="button" className="entornos-icon-btn entornos-icon-btn--edit" title="Editar cluster" aria-label={`Editar ${c.nombre}`}
++                        onClick={() => setForm({ modo: "editar", datos: { nombre: c.nombre, ambiente: c.ambiente, datacenter: c.datacenter } })}><IconPencil /></button>
++                      <button type="button" className="entornos-icon-btn entornos-icon-btn--danger" title="Eliminar cluster" aria-label={`Eliminar ${c.nombre}`}
++                        onClick={() => setBorrar(c)}><IconTrash /></button>
++                    </div>
++                  </td>
++                </tr>
++              ))}
++              {filas.length === 0 && (
++                <tr><td colSpan={5} className="admin-mant-tabla__empty">{query ? "Sin coincidencias." : "No hay clusters registrados."}</td></tr>
++              )}
++            </tbody>
++          </table>
++        </div>
++      </section>
++
++      {form && (
++        <div className="ciclo-vida-modal__overlay" onClick={() => setForm(null)}>
++          <div className="ciclo-vida-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
++            <div className="ciclo-vida-modal__bar ciclo-vida-modal__bar--accent" />
++            <div className="ciclo-vida-modal__head">
++              <h3>{form.modo === "nuevo" ? "Nuevo cluster" : `Editar cluster — ${form.datos.nombre}`}</h3>
++              <button type="button" className="ciclo-vida-modal__close" onClick={() => setForm(null)}><IconClose /></button>
++            </div>
++            <div className="ciclo-vida-modal__body">
++              <label className="ciclo-vida-modal__field"><span>Nombre</span>
++                <input value={form.datos.nombre} onChange={set("nombre")} disabled={form.modo === "editar"} placeholder="Ej. DB Cluster Producción" />
++                {form.modo === "editar" && <small className="entornos-ayuda">El nombre no se puede modificar porque identifica al cluster en el sistema.</small>}
++              </label>
++              <label className="ciclo-vida-modal__field"><span>Ambiente</span>
++                <select value={form.datos.ambiente} onChange={set("ambiente")}>
++                  <option value="" disabled>Selecciona un ambiente</option>
++                  {Object.entries(AMBIENTES).map(([v, a]) => <option key={v} value={v}>{a.label}</option>)}
++                </select>
++              </label>
++              <label className="ciclo-vida-modal__field"><span>Datacenter</span>
++                <select value={form.datos.datacenter} onChange={set("datacenter")}>
++                  <option value="" disabled>Selecciona un datacenter</option>
++                  {DATACENTERS.map((d) => <option key={d}>{d}</option>)}
++                </select>
++              </label>
++              <div className="ciclo-vida-modal__actions">
++                <button type="button" className="ciclo-vida-modal__cancel" onClick={() => setForm(null)}>Cancelar</button>
++                <button type="button" className="ciclo-vida-modal__confirm ciclo-vida-modal__confirm--accent" disabled={!puedeGuardar}>
++                  {form.modo === "nuevo" ? "Registrar cluster" : "Guardar cambios"}
++                </button>
++              </div>
++            </div>
++          </div>
++        </div>
++      )}
++
++      {borrar && (
++        <div className="ciclo-vida-modal__overlay" onClick={() => setBorrar(null)}>
++          <div className="ciclo-vida-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
++            <div className="ciclo-vida-modal__bar ciclo-vida-modal__bar--red" />
++            <div className="ciclo-vida-modal__head">
++              <h3>Eliminar cluster</h3>
++              <button type="button" className="ciclo-vida-modal__close" onClick={() => setBorrar(null)}><IconClose /></button>
++            </div>
++            <div className="ciclo-vida-modal__body">
++              <p className="entornos-aviso">
++                {bloqueado
++                  ? <>No se puede eliminar <strong>{borrar.nombre}</strong> porque tiene {borrar.activos} equipo(s) asignado(s). Reasigna esos equipos a otro cluster antes de eliminarlo.</>
++                  : <>¿Seguro que deseas eliminar el cluster <strong>{borrar.nombre}</strong>? Esta acción no se puede deshacer.</>}
++              </p>
++              <div className="ciclo-vida-modal__actions">
++                <button type="button" className="ciclo-vida-modal__cancel" onClick={() => setBorrar(null)}>{bloqueado ? "Entendido" : "Cancelar"}</button>
++                {!bloqueado && <button type="button" className="ciclo-vida-modal__confirm ciclo-vida-modal__confirm--red">Eliminar cluster</button>}
++              </div>
++            </div>
++          </div>
++        </div>
++      )}
++    </div>
++  );
++}
++export default AdministrarClusters;
+diff --git a/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarDatacenters.jsx b/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarDatacenters.jsx
+new file mode 100644
+index 0000000..b1ac7bc
+--- /dev/null
++++ b/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarDatacenters.jsx
+@@ -0,0 +1,142 @@
++import { useMemo, useState } from "react";
++import { IconSearch, IconPlus, IconClose, IconPencil, IconTrash, IconMapPin } from "../../components/icons";
++import "../administrar-equipos/AdministrarEquipos.css";
++import "../../components/CicloVidaActivo.css";
++import "./AdministrarEntornos.css";
++
++// Datos de ejemplo: reemplazar por la respuesta de GET /api/datacenters.
++const DATACENTERS = [
++  { nombre: "Data Center Lima Central", latitud: "-12.0464", longitud: "-77.0428", clusters: 4, equipos: 37 },
++  { nombre: "Data Center Callao DR", latitud: "-12.0566", longitud: "-77.1181", clusters: 1, equipos: 6 },
++  { nombre: "Data Center Trujillo Norte", latitud: "-8.1116", longitud: "-79.0288", clusters: 1, equipos: 5 },
++  { nombre: "Data Center Arequipa Sur", latitud: "-16.4090", longitud: "-71.5375", clusters: 1, equipos: 7 },
++  { nombre: "Data Center Piura", latitud: "-5.1945", longitud: "-80.6328", clusters: 0, equipos: 0 },
++];
++const VACIO = { nombre: "", latitud: "", longitud: "" };
++const enRango = (v, max) => v.trim() === "" || (!Number.isNaN(Number(v)) && Math.abs(Number(v)) <= max);
++
++function AdministrarDatacenters() {
++  const [query, setQuery] = useState("");
++  const [form, setForm] = useState(null);
++  const [borrar, setBorrar] = useState(null);
++
++  const filas = useMemo(
++    () => DATACENTERS.filter((d) => d.nombre.toLowerCase().includes(query.trim().toLowerCase())),
++    [query]
++  );
++  const set = (campo) => (e) => setForm((f) => ({ ...f, datos: { ...f.datos, [campo]: e.target.value } }));
++  const latOk = form ? enRango(form.datos.latitud, 90) : true;
++  const lonOk = form ? enRango(form.datos.longitud, 180) : true;
++  const puedeGuardar = form && form.datos.nombre.trim() && latOk && lonOk;
++  const bloqueado = borrar && (borrar.clusters > 0 || borrar.equipos > 0);
++
++  return (
++    <div className="admin-equipos admin-equipos--wide">
++      <section className="panel admin-mant-tabla">
++        <div className="admin-mant-tabla__head">
++          <div>
++            <h3>Datacenters registrados</h3>
++            <p>{filas.length} datacenter(s) registrados.</p>
++          </div>
++          <div className="entornos-head-actions">
++            <div className="equipo-combobox__input-wrap admin-mant-tabla__search">
++              <IconSearch className="equipo-combobox__search-icon" />
++              <input className="equipo-combobox__input" placeholder="Buscar datacenter..." value={query} onChange={(e) => setQuery(e.target.value)} />
++            </div>
++            <button type="button" className="entornos-btn" onClick={() => setForm({ modo: "nuevo", datos: VACIO })}><IconPlus /> Nuevo datacenter</button>
++          </div>
++        </div>
++        <div className="admin-mant-tabla__wrap">
++          <table className="admin-mant-tabla__table">
++            <thead><tr><th>Nombre</th><th>Coordenadas</th><th>Clusters</th><th>Equipos</th><th></th></tr></thead>
++            <tbody>
++              {filas.map((d) => (
++                <tr key={d.nombre}>
++                  <td>
++                    <div className="entornos-dc-nombre">
++                      <IconMapPin className="entornos-dc-icon" />
++                      <span className="admin-mant-tabla__equipo-name">{d.nombre}</span>
++                    </div>
++                  </td>
++                  <td className="tabular entornos-coord">{d.latitud && d.longitud ? `${d.latitud}, ${d.longitud}` : "—"}</td>
++                  <td className="tabular">{d.clusters}</td>
++                  <td className="tabular">{d.equipos}</td>
++                  <td>
++                    <div className="entornos-acciones">
++                      <button type="button" className="entornos-icon-btn entornos-icon-btn--edit" title="Editar datacenter" aria-label={`Editar ${d.nombre}`}
++                        onClick={() => setForm({ modo: "editar", datos: { nombre: d.nombre, latitud: d.latitud, longitud: d.longitud } })}><IconPencil /></button>
++                      <button type="button" className="entornos-icon-btn entornos-icon-btn--danger" title="Eliminar datacenter" aria-label={`Eliminar ${d.nombre}`}
++                        onClick={() => setBorrar(d)}><IconTrash /></button>
++                    </div>
++                  </td>
++                </tr>
++              ))}
++              {filas.length === 0 && (
++                <tr><td colSpan={5} className="admin-mant-tabla__empty">{query ? "Sin coincidencias." : "No hay datacenters registrados."}</td></tr>
++              )}
++            </tbody>
++          </table>
++        </div>
++      </section>
++
++      {form && (
++        <div className="ciclo-vida-modal__overlay" onClick={() => setForm(null)}>
++          <div className="ciclo-vida-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
++            <div className="ciclo-vida-modal__bar ciclo-vida-modal__bar--accent" />
++            <div className="ciclo-vida-modal__head">
++              <h3>{form.modo === "nuevo" ? "Nuevo datacenter" : `Editar datacenter — ${form.datos.nombre}`}</h3>
++              <button type="button" className="ciclo-vida-modal__close" onClick={() => setForm(null)}><IconClose /></button>
++            </div>
++            <div className="ciclo-vida-modal__body">
++              <label className="ciclo-vida-modal__field"><span>Nombre</span>
++                <input value={form.datos.nombre} onChange={set("nombre")} disabled={form.modo === "editar"} placeholder="Ej. Data Center Lima Central" />
++                {form.modo === "editar" && <small className="entornos-ayuda">El nombre no se puede modificar porque identifica al datacenter en el sistema.</small>}
++              </label>
++              <div className="entornos-grid-2">
++                <label className="ciclo-vida-modal__field"><span>Latitud</span>
++                  <input value={form.datos.latitud} onChange={set("latitud")} placeholder="Ej. -12.0464" />
++                  {!latOk && <small className="entornos-error">Debe ser un número entre -90 y 90.</small>}
++                </label>
++                <label className="ciclo-vida-modal__field"><span>Longitud</span>
++                  <input value={form.datos.longitud} onChange={set("longitud")} placeholder="Ej. -77.0428" />
++                  {!lonOk && <small className="entornos-error">Debe ser un número entre -180 y 180.</small>}
++                </label>
++              </div>
++              <p className="entornos-ayuda">Las coordenadas se usan para ubicar el datacenter en el mapa de inicio.</p>
++              <div className="ciclo-vida-modal__actions">
++                <button type="button" className="ciclo-vida-modal__cancel" onClick={() => setForm(null)}>Cancelar</button>
++                <button type="button" className="ciclo-vida-modal__confirm ciclo-vida-modal__confirm--accent" disabled={!puedeGuardar}>
++                  {form.modo === "nuevo" ? "Registrar datacenter" : "Guardar cambios"}
++                </button>
++              </div>
++            </div>
++          </div>
++        </div>
++      )}
++
++      {borrar && (
++        <div className="ciclo-vida-modal__overlay" onClick={() => setBorrar(null)}>
++          <div className="ciclo-vida-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
++            <div className="ciclo-vida-modal__bar ciclo-vida-modal__bar--red" />
++            <div className="ciclo-vida-modal__head">
++              <h3>Eliminar datacenter</h3>
++              <button type="button" className="ciclo-vida-modal__close" onClick={() => setBorrar(null)}><IconClose /></button>
++            </div>
++            <div className="ciclo-vida-modal__body">
++              <p className="entornos-aviso">
++                {bloqueado
++                  ? <>No se puede eliminar <strong>{borrar.nombre}</strong> porque tiene {borrar.clusters} cluster(s) y {borrar.equipos} equipo(s) asociados. Reasígnalos antes de eliminarlo.</>
++                  : <>¿Seguro que deseas eliminar el datacenter <strong>{borrar.nombre}</strong>? Esta acción no se puede deshacer.</>}
++              </p>
++              <div className="ciclo-vida-modal__actions">
++                <button type="button" className="ciclo-vida-modal__cancel" onClick={() => setBorrar(null)}>{bloqueado ? "Entendido" : "Cancelar"}</button>
++                {!bloqueado && <button type="button" className="ciclo-vida-modal__confirm ciclo-vida-modal__confirm--red">Eliminar datacenter</button>}
++              </div>
++            </div>
++          </div>
++        </div>
++      )}
++    </div>
++  );
++}
++export default AdministrarDatacenters;
+diff --git a/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarEntornos.css b/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarEntornos.css
+new file mode 100644
+index 0000000..0b0ad76
+--- /dev/null
++++ b/Frontend-SI-INFRA-TI/src/pages/administrar-entornos/AdministrarEntornos.css
+@@ -0,0 +1,31 @@
++.entornos-head-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
++.entornos-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-md);
++  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-soft);
++  color: var(--accent-strong); font-size: 13px; font-weight: 500; cursor: pointer; }
++.entornos-btn svg { width: 15px; height: 15px; }
++.entornos-tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 500; }
++.entornos-tag--prod { color: var(--status-critical); background: var(--status-critical-bg); }
++.entornos-tag--qa { color: var(--status-warning); background: var(--status-warning-bg); }
++.entornos-tag--dev { color: var(--status-good); background: var(--status-good-bg); }
++.ciclo-vida-modal__field select { width: 100%; padding: 9px 12px; border-radius: var(--radius-md); border: 1px solid var(--border);
++  background: var(--bg-surface-2); color: var(--text-primary); font-size: 13px; }
++.entornos-acciones { display: flex; gap: 6px; justify-content: flex-end; }
++.entornos-icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;
++  border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer;
++  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
++.entornos-icon-btn svg { width: 16px; height: 16px; }
++.entornos-icon-btn:hover { background: var(--accent-soft); color: var(--accent-strong); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
++.entornos-icon-btn--danger { background: var(--status-critical-bg); color: var(--status-critical); border-color: color-mix(in srgb, var(--status-critical) 35%, transparent); }
++.entornos-icon-btn--danger:hover { background: color-mix(in srgb, var(--status-critical-bg) 55%, var(--status-critical) 20%); color: var(--status-critical); border-color: color-mix(in srgb, var(--status-critical) 35%, transparent); }
++.entornos-aviso { font-size: 13px; line-height: 1.5; color: var(--text-secondary); margin: 0 0 6px; }
++.entornos-aviso strong { color: var(--text-primary); }
++.entornos-icon-btn--edit { background: var(--accent-soft); color: var(--accent-strong); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
++.entornos-icon-btn--edit:hover { background: color-mix(in srgb, var(--accent-soft) 55%, var(--accent) 20%); color: var(--accent-strong); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
++.entornos-dc-nombre { display: flex; align-items: center; gap: 8px; }
++.entornos-dc-icon { width: 16px; height: 16px; color: var(--accent-strong); flex-shrink: 0; }
++.entornos-coord { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
++.entornos-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
++.entornos-ayuda { font-size: 12px; color: var(--text-muted); margin: 0; }
++.entornos-error { font-size: 11.5px; color: var(--status-critical); }
++.entornos-ayuda { margin-bottom: 4px; }
++.ciclo-vida-modal__field input:disabled { opacity: 0.6; cursor: not-allowed; }

@@ -158,3 +158,14 @@ export function actualizarDatacenter(nombre, datos) {
 export function eliminarDatacenter(nombre) {
   return apiJson(`/api/datacenters/${encodeURIComponent(nombre)}`, { method: "DELETE" });
 }
+
+export function listarUmbrales() {
+  return apiJson("/api/umbrales");
+}
+
+export function actualizarUmbral(nombre, limites) {
+  return apiJson(`/api/umbrales/${encodeURIComponent(nombre)}`, {
+    method: "PUT",
+    body: JSON.stringify(limites),
+  });
+}

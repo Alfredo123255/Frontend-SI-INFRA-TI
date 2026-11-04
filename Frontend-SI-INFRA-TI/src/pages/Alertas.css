@@ -32,3 +32,5 @@
 .alertas__empty strong { color: var(--status-good); font-size: 16px; }
 .alertas__empty p { margin: 7px 0 0; }
 @media (max-width: 720px) { .alertas__heading { align-items: flex-start; flex-direction: column; } .alertas__summary { flex-direction: column; } }
+
+.alertas__badge--media { color: var(--status-warning); background: var(--status-warning-bg); }

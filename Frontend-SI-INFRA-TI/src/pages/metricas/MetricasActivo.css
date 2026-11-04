@@ -106,17 +106,23 @@
 .metricas-tiles--dos { grid-template-columns: 1fr 1fr; }
 @media (max-width: 900px) { .metricas-tiles--dos { grid-template-columns: 1fr; } }
 
-/* Solo exportación: la maqueta en pantalla conserva sus estilos aprobados. */
+/* La impresión conserva los gráficos y el periodo de la vista. */
 .metricas-print-periodo { display: none; }
 @media print {
   @page { size: A4; margin: 12mm; }
-  .sidebar, .topbar, .metricas button, .metricas .detail-placeholder__back,
-
+  .sidebar, .topbar, .metricas button:not(.puertos-tabla__nombre button), .metricas .detail-placeholder__back,
+  .metricas-periodo, .metricas-rango, .metricas-menu, .metricas-card__acciones { display: none !important; }
+  .app-content { padding: 0; }
+  .app-shell, .app-main { display: block; }
+  .metricas-print-periodo { display: block; font-size: 12px; }
+  .metricas-card, .metricas-tile { break-inside: avoid; }
+  .metricas, .lc { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
 .metricas-periodo, .metricas-rango, .metricas-card__head { flex-wrap: wrap; }
 .metricas-rango [role="alert"] { flex-basis: 100%; }
-.metricas-valor--ok { color: var(--status-good); }
-.metricas-valor--warn { color: var(--status-warning); }
-.metricas-valor--crit { color: var(--status-critical); }
+.metricas-valor--ok, .metricas-tile__multi .metricas-valor--ok { color: var(--status-good); }
+.metricas-valor--warn, .metricas-tile__multi .metricas-valor--warn { color: var(--status-warning); }
+.metricas-valor--crit, .metricas-tile__multi .metricas-valor--crit { color: var(--status-critical); }
 .metricas-aviso { padding: 12px 16px; color: var(--status-warning); }
 .metricas-vacio { display: grid; place-items: center; color: var(--text-muted); font-size: 13px; }
 .puertos-tabla th, .puertos-tabla td { white-space: nowrap; }

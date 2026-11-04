@@ -19,14 +19,15 @@ function fecha(valor) {
 }
 
 function Alertas({ alertas, loading, error }) {
-  const apagados = alertas.filter((alerta) => alerta.estadoOperativo === "Apagado").length;
+  const cantidadEquipos = new Set(alertas.map((alerta) => alerta.activoId)).size;
+  const apagados = alertas.filter((alerta) => alerta.estadoOperativo === "Apagado" && !alerta.campo?.startsWith("umbral_")).length;
   const sinConexion = alertas.filter((alerta) => alerta.estadoConexion === "Sin conexión").length;
 
   return (
     <div className="alertas">
       <div className="alertas__heading">
         <p>Consulta el último evento de los equipos apagados o sin conexión SNMP.</p>
-        <span className="alertas__count">{loading ? "Consultando…" : `${alertas.length} equipo${alertas.length === 1 ? "" : "s"}`}</span>
+        <span className="alertas__count">{loading ? "Consultando…" : `${cantidadEquipos} equipo${cantidadEquipos === 1 ? "" : "s"}`}</span>
       </div>
 
       {!loading && !error && (
@@ -39,7 +40,7 @@ function Alertas({ alertas, loading, error }) {
       {loading && <p className="alertas__message">Cargando alertas...</p>}
       {error && <p role="alert" className="alertas__message alertas__message--error">No se pudieron consultar las alertas. Comprueba que el backend esté disponible.</p>}
       {!loading && !error && alertas.length === 0 && (
-        <div className="alertas__empty"><strong>Sin alertas activas</strong><p>No hay equipos apagados ni conexiones SNMP caídas.</p></div>
+        <div className="alertas__empty"><strong>Sin alertas activas</strong><p>No hay condiciones activas que requieran atención.</p></div>
       )}
       {!loading && !error && alertas.length > 0 && (
         <div className="panel alertas__panel">
@@ -52,13 +53,14 @@ function Alertas({ alertas, loading, error }) {
               <thead><tr><th>Equipo</th><th>Alerta actual</th><th>Último evento</th><th>Fecha</th><th>Acciones</th></tr></thead>
               <tbody>
                 {alertas.map((alerta) => (
-                  <tr key={alerta.activoId}>
+                  <tr key={JSON.stringify([alerta.activoId, alerta.campo, alerta.componenteTipo, alerta.componenteSn, alerta.estadoConexion])}>
                     <td>
                       <Link className="alertas__name" to={rutaActivo(alerta)}>{alerta.hostname || `Activo #${alerta.activoId}`}</Link>
                       <span className="alertas__type">{alerta.tipoActivo === "SERVIDOR" && alerta.tipoServidor ? `Servidor ${alerta.tipoServidor}` : alerta.tipoActivo}</span>
                     </td>
                     <td><div className="alertas__badges">
-                      {alerta.estadoOperativo === "Apagado" && <span className="alertas__badge">Apagado</span>}
+                      {!alerta.campo?.startsWith("umbral_") && alerta.estadoOperativo === "Apagado" && <span className="alertas__badge">Apagado</span>}
+                      {alerta.campo?.startsWith("umbral_") && <span className={`alertas__badge ${alerta.valorNuevo === "Advertencia" ? "alertas__badge--media" : ""}`}>{alerta.valorNuevo === "Advertencia" ? "Media" : "Crítica"}</span>}
                       {alerta.estadoConexion === "Sin conexión" && <span className="alertas__badge">Sin conexión SNMP</span>}
                     </div></td>
                     <td className="alertas__event">

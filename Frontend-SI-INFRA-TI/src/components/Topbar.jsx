@@ -89,7 +89,7 @@ function Topbar({ pathname, theme, onToggleTheme, alertas, alertasLoading, alert
   const now = useClock();
   const meta = getMeta(pathname);
 
-  const overall = alertasError || alertasLoading ? "warning" : alertas.length ? "critical" : "good";
+  const overall = alertasError || alertasLoading ? "warning" : alertas.some((alerta) => !alerta.campo?.startsWith("umbral_") || alerta.valorNuevo === "Crítico") ? "critical" : alertas.length ? "warning" : "good";
   const overallLabel = alertasError ? "Alertas no disponibles"
     : alertasLoading ? "Cargando alertas"
     : alertas.length ? `${alertas.length} alerta${alertas.length === 1 ? "" : "s"}` : "Sin alertas";

@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import WorldMap from "../components/WorldMap";
 import StatusBadge from "../components/StatusBadge";
 import { datacenters, STATUS } from "../data/datacenters";
 import { IconServerStack, IconDrive, IconAlert, IconBolt } from "../components/icons";
+import { listarUmbrales } from "../api/client";
 import "./Home.css";
 
 function Home() {
   const [activeId, setActiveId] = useState(datacenters[0].id);
+  const [umbrales, setUmbrales] = useState(null);
+  useEffect(() => {
+    let activo = true;
+    listarUmbrales().then((filas) => {
+      if (activo) setUmbrales(new Map(filas.map((fila) => [fila.nombre, fila.advertencia])));
+    }).catch(() => { if (activo) setUmbrales(false); });
+    return () => { activo = false; };
+  }, []);
   const active = datacenters.find((dc) => dc.id === activeId) ?? datacenters[0];
 
   const totalServers = datacenters.reduce((sum, dc) => sum + dc.servers, 0);
@@ -120,23 +129,27 @@ function Home() {
               {[
                 {
                   label: "Storage",
+                  metrica: "almacenamiento_uso_tb",
                   value: `${active.storageUsedTB}/${active.storageTB} TB`,
                   pct: (active.storageUsedTB / active.storageTB) * 100,
                 },
                 {
                   label: "RAM",
+                  metrica: "ram_uso_gb",
                   value: `${active.ramUsedPct}% de ${active.ramTotalTB} TB`,
                   pct: active.ramUsedPct,
                 },
                 {
                   label: "CPU",
+                  metrica: "cpu_uso_ghz",
                   value: `${active.cpuUsagePct}%`,
                   pct: active.cpuUsagePct,
                 },
               ].map((row) => (
                 <div className="usage-row" key={row.label}>
                   <div className="usage-row__top">
-                    <span>{row.label}</span>
+                    <span>{row.label} · {umbrales == null ? "Cargando meta…" : umbrales === false ? "Meta no disponible" : umbrales.get(row.metrica) == null
+                      ? "Sin meta" : `Meta libre ≥ ${100 - umbrales.get(row.metrica)} %`}</span>
                     <span className="tabular">{row.value}</span>
                   </div>
                   <div className="usage-row__bar">

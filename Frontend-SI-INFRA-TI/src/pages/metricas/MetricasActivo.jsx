@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { IconChevronLeft, IconDownload, IconPlus, IconClose } from "../../components/icons";
 import LineChart from "./LineChart";
+import { listarUmbrales } from "../../api/client";
 import PuertosSwitch from "./PuertosSwitch";
 import { utilizacion } from "./utilizacion";
 import { exportarGrafico, exportarTablaPuertos, exportarVistaPdf } from "./exportarMetricas";
@@ -151,7 +152,7 @@ const COLORES = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(-
 const MAX_COMPARAR = 3;
 
 function nivel(umbral, v) {
-  if (!umbral) return { clase: "sin", texto: "Sin umbral" };
+  if (umbral?.advertencia == null || umbral.critico == null) return { clase: "sin", texto: "Sin umbral" };
   if (v >= umbral.critico) return { clase: "crit", texto: "Crítico" };
   if (v >= umbral.advertencia) return { clase: "warn", texto: "Advertencia" };
   return { clase: "ok", texto: "Normal" };
@@ -198,6 +199,18 @@ function VistaMetricas() {
   const rutaFicha = `/inventario/${equipo.ficha}/${activoId}`;
   const volver = existe && qs.get("volver") === rutaFicha ? rutaFicha : equipo.lista;
   const escenario = qs.get("escenario");
+  const [umbrales, setUmbrales] = useState(new Map());
+  useEffect(() => {
+    let activo = true;
+    listarUmbrales().then((filas) => {
+      if (activo) setUmbrales(new Map(filas.map((fila) => [fila.nombre, fila])));
+    }).catch(() => {});
+    return () => { activo = false; };
+  }, []);
+  const limite = (nombre) => {
+    const umbral = umbrales.get(nombre);
+    return umbral?.advertencia != null && umbral.critico != null ? umbral : null;
+  };
   const esServidor = tipo === "rackeable" || tipo === "blade";
   const sinDiscos = esServidor && escenario === "sinDiscos";
   const [busqueda, setBusqueda] = useState("");
@@ -241,11 +254,16 @@ function VistaMetricas() {
     metricas: metricasBase.map((m) => {
       const sinMediciones = (escenario === "metricaSinDatos" && m.etiqueta === "Temperatura") || qs.has("sinDatos");
       const ausente = sinDiscos && m.corto === "Disco";
-      return { ...m, ausente, series: m.series.map((s) => {
+      return { ...m, umbral: limite(m.nombre), ausente, series: m.series.map((s, i) => {
         const valores = [...s.valores];
         const cpu = /^cpu(79|80|89|90)$/.exec(escenario);
         if (esServidor && cpu && m.corto === "CPU") valores[valores.length - 1] = Number(cpu[1]);
-        return { ...s, actual: sinMediciones || ausente ? null : valores.at(-1),
+        const clave = m.nombre === "red_trafico_mbps"
+          ? ["red_trafico_entrada_mbps", "red_trafico_salida_mbps"][i]
+          : m.nombre === "almacenamiento_throughput_mbps"
+            ? ["almacenamiento_throughput_lectura_mbps", "almacenamiento_throughput_escritura_mbps"][i]
+            : m.nombre;
+        return { ...s, umbral: tipo === "switch" && m.nombre === "red_trafico_mbps" ? null : limite(clave), actual: sinMediciones || ausente ? null : valores.at(-1),
           valores: muestras(valores, periodoVacio || sinMediciones || ausente) };
       }) };
     }),
@@ -336,11 +354,16 @@ function VistaMetricas() {
               ) : (
                 <div className="metricas-tile__multi">
                   {sinDatos && <span className="metricas-tile__abs">Sin mediciones en este periodo.</span>}
-                  {m.series.map((s, i) => <span key={s.nombre} className="tabular"><em>{s.nombre}</em><strong>{actuales[i] == null ? "—" : fmt(actuales[i])}</strong> <small>{m.unidad}</small></span>)}
+                  {m.series.map((s, i) => <span key={s.nombre} className="tabular"><em>{s.nombre}</em><strong className={actuales[i] == null ? undefined : `metricas-valor--${nivel(s.umbral, actuales[i]).clase}`}>{actuales[i] == null ? "—" : fmt(actuales[i])}</strong> <small>{m.unidad}</small></span>)}
                 </div>
               )}
               {m.nota && <span className={`metricas-tile__abs ${m.series.length > 1 ? "metricas-tile__abs--multi" : ""}`}>{m.nota}</span>}
-              {!sinDatos && <span className={`metricas-estado metricas-estado--${n.clase}`}><i />{n.texto}</span>}
+              {!sinDatos && (m.series.length > 1 && m.series.some((s) => s.umbral)
+                ? m.series.map((s) => {
+                  const estado = nivel(s.umbral, s.actual);
+                  return <span key={s.nombre} className={`metricas-estado metricas-estado--${estado.clase}`}><i />{s.nombre} · {estado.texto}</span>;
+                })
+                : <span className={`metricas-estado metricas-estado--${n.clase}`}><i />{n.texto}</span>)}
             </div>
           );
         })}
@@ -421,7 +444,10 @@ function VistaMetricas() {
             <LineChart
               series={m.series.map((s, i) => ({ nombre: s.nombre, color: COLORES[i], values: s.valores }))}
               labels={datos.etiquetas} unidad={m.unidad} max={m.maximo}
-              umbrales={m.umbral ? [{ nombre: "Advertencia", valor: m.umbral.advertencia, nivel: "warn" }, { nombre: "Crítico", valor: m.umbral.critico, nivel: "crit" }] : null}
+              umbrales={m.series.some((s) => s.umbral) ? m.series.flatMap((s) => s.umbral ? [
+                { nombre: m.series.length > 1 ? `Advertencia · ${s.nombre}` : "Advertencia", valor: s.umbral.advertencia, nivel: "warn" },
+                { nombre: m.series.length > 1 ? `Crítico · ${s.nombre}` : "Crítico", valor: s.umbral.critico, nivel: "crit" },
+              ] : []) : null}
             />
           </div>
         ))}

@@ -227,7 +227,7 @@ function ServerBladeDetail() {
                     <div className="server-detail__section-header-actions">
                       {section.key === "general" && (
                         <>
-                          <MetricasActivoLink activoId={id} />
+                          <MetricasActivoLink activoId={id} hostname={data.hostname} />
                           <HistorialActivoLink activoId={id} />
                         </>
                       )}

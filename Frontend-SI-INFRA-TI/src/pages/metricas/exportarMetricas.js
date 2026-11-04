@@ -13,13 +13,17 @@ const descargar = (blob, nombre) => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
+function descargarCsv(columnas, filas, periodo, nombre) {
+  const celda = (valor) => `"${String(valor ?? "").replaceAll('"', '""')}"`;
+  const contenido = [`# Periodo: ${periodo}`, ...[columnas, ...filas].map((fila) => fila.map(celda).join(","))];
+  descargar(new Blob(["\ufeff" + contenido.join("\r\n")], { type: "text/csv;charset=utf-8" }), nombre);
+}
+
 export async function exportarGrafico({ opcion, boton, titulo, series, etiquetas, hostname, periodo }) {
   const nombre = `${slug(titulo)}_${hostname}_${fechaArchivo()}`;
   if (opcion === "Datos CSV") {
-    const celda = (valor) => `"${String(valor ?? "").replaceAll('"', '""')}"`;
-    const filas = [`# Periodo: ${periodo}`, ["fecha", ...series.map((s) => s.nombre)].map(celda).join(","),
-      ...etiquetas.map((fecha, i) => [fecha, ...series.map((s) => s.values[i])].map(celda).join(","))];
-    descargar(new Blob(["\ufeff" + filas.join("\r\n")], { type: "text/csv;charset=utf-8" }), `${nombre}.csv`);
+    descargarCsv(["fecha", ...series.map((s) => s.nombre)],
+      etiquetas.map((fecha, i) => [fecha, ...series.map((s) => s.values[i])]), periodo, `${nombre}.csv`);
     return;
   }
   const card = boton.closest(".metricas-card");
@@ -52,6 +56,10 @@ export async function exportarGrafico({ opcion, boton, titulo, series, etiquetas
     if (!blob) throw new Error("No se pudo generar la imagen.");
     descargar(blob, `${nombre}.png`);
   } finally { URL.revokeObjectURL(url); }
+}
+
+export async function exportarTablaPuertos({ columnas, filas, hostname, periodo }) {
+  descargarCsv(columnas, filas, periodo, `puertos_${hostname}_${fechaArchivo()}.csv`);
 }
 
 export function exportarVistaPdf(hostname) {

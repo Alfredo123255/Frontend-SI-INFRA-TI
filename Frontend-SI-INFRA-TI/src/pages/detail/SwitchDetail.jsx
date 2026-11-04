@@ -8,6 +8,7 @@ import DetailTable from "./DetailTable";
 import MaintenanceNotice from "./MaintenanceNotice";
 import SnmpConnectionNotice from "./SnmpConnectionNotice";
 import HistorialActivoLink from "./HistorialActivoLink";
+import MetricasActivoLink from "./MetricasActivoLink";
 import DatosGeneralesEditables from "./DatosGeneralesEditables";
 import { obtenerSwitch } from "../../api/client";
 import { potenciaFuenteW } from "./potenciaFuente";
@@ -235,7 +236,10 @@ function SwitchDetail() {
                     </button>
                     <div className="server-detail__section-header-actions">
                       {section.key === "general" && (
-                        <HistorialActivoLink activoId={id} />
+                        <>
+                          <MetricasActivoLink activoId={id} hostname={data.hostname} />
+                          <HistorialActivoLink activoId={id} />
+                        </>
                       )}
                       {section.key === "general" && (
                         <button

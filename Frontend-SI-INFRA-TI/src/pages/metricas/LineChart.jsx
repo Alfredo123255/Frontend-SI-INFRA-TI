@@ -18,15 +18,18 @@ export default function LineChart({ series, labels, unidad, max, umbrales, heigh
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const H = height, P = { t: 12, r: endLabels ? 112 : umbrales ? 92 : 16, b: 26, l: 40 };
+  // Con etiquetas al final, el margen derecho crece según el nombre más largo.
+  const largo = Math.max(0, ...series.map((s) => s.nombre.length));
+  const H = height, P = { t: 12, r: endLabels ? Math.max(112, largo * 6.2 + 52) : umbrales ? 92 : 16, b: 26, l: 40 };
   const iw = W - P.l - P.r, ih = H - P.t - P.b;
   const top = useMemo(() => {
     if (max) return max;
     const m = Math.max(0, ...series.flatMap((s) => s.values).filter((v) => v != null));
-    const paso = Math.pow(10, Math.floor(Math.log10(m || 1)));
-    return Math.max(1, Math.ceil((m * 1.15) / paso) * paso);
-  }, [series, max]);
-  const x = (i) => P.l + (i / Math.max(1, labels.length - 1)) * iw;
+    const limite = Math.max(m * 1.15, ...((umbrales ?? []).map((u) => u.valor * 1.08)));
+    const paso = Math.pow(10, Math.floor(Math.log10(limite || 1)));
+    return Math.max(1, Math.ceil(limite / paso) * paso);
+  }, [series, max, umbrales]);
+  const x = (i) => P.l + (i / (labels.length - 1)) * iw;
   const y = (v) => P.t + ih - (v / top) * ih;
   const ticks = [0, top / 2, top];
   const fmt = (v) => (v >= 1000 ? `${(v / 1000).toFixed(1).replace(".0", "")}K` : Number.isInteger(v) ? v : v.toFixed(1));
@@ -43,6 +46,10 @@ export default function LineChart({ series, labels, unidad, max, umbrales, heigh
     const i = Math.round(((px - P.l) / iw) * (labels.length - 1));
     setHover(i >= 0 && i < labels.length ? i : null);
   };
+
+  if (!series.some((s) => s.values.some((v) => v != null))) {
+    return <div ref={boxRef} className="metricas-vacio" style={{ minHeight: height }}>Sin datos registrados</div>;
+  }
 
   return (
     <div className="lc" ref={boxRef}>
